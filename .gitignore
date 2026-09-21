@@ -1,0 +1,15 @@
+# secrets — NEVER commit
+.env*
+*.pem
+
+# runtime artifacts
+__pycache__/
+logs/
+crypto/
+*.log
+revolut_state*.json
+forward_state*.json
+
+# local backups (git history is the backup)
+*.v3.bak*
+*.backup
