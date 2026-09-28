@@ -39,6 +39,7 @@ start_bot() {
 
     # 3) Not running — start it
     echo "Starting $name..."
+    cd "$(dirname "$script_full")" || return 1
     nohup python3 -u "$script_full" >> "$logfile" 2>&1 &
     local new_pid=$!
     echo "$new_pid" > "$pidfile"
@@ -57,6 +58,6 @@ start_bot() {
 start_bot "OKX RSI Scalper Pro" "$BOTS/live_rsi_scalper_okx.py" "live_rsi_scalper_okx.log"
 
 # Start Revolut RSI v2 (recovered as compiled bytecode 2026-09-14; source lost)
-start_bot "Revolut RSI v2 trend-filtered" "$BOTS/live_trading_revolut_v2.pyc" "live_trading_revolut_v2.log"
+start_bot "Revolut RSI v2 trend-filtered" "/home/node/.openclaw/workspace/crypto.pre_dedup_20260918/pyc_archive/live_trading_revolut_v2.pyc" "live_trading_revolut_v2.log"
 
 echo "All bots checked."

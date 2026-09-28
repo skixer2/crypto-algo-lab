@@ -13,3 +13,7 @@ forward_state*.json
 # local backups (git history is the backup)
 *.v3.bak*
 *.backup
+
+# compiled bytecode — never in git (purged from history 2026-09-28)
+*.pyc
+__pycache__/
