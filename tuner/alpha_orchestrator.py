@@ -165,14 +165,16 @@ def main() -> int:
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     os.makedirs(RUNS_DIR, exist_ok=True)
-    label = args.label or f"{args.formula}_{args.symbol.replace('/', '')}_{pd.Timestamp.utcnow().strftime('%Y%m%d_%H%M%S')}"
+    label = args.label or f"{args.formula}_{args.symbol.replace('/', '')}_{pd.Timestamp.now('UTC').strftime('%Y%m%d_%H%M%S')}"
 
     # 1) data
     csv_paths: Dict[str, str] = {}
+    start_utc = pd.Timestamp(args.start, tz="UTC").isoformat()
+    end_utc = pd.Timestamp(args.end, tz="UTC").isoformat()
     for tf in (args.exec_tf, args.bias_tf):
         log.warning(f"loading {args.symbol} {tf} {args.start}..{args.end}")
         _, path, n = load_candles(symbol=args.symbol, timeframe=tf,
-                                  start=args.start, end=args.end)
+                                  start=start_utc, end=end_utc)
         csv_paths[tf] = path
         log.warning(f"  -> {n} candles: {path}")
     exec_df = pd.read_csv(csv_paths[args.exec_tf], parse_dates=["timestamp"], index_col="timestamp")
@@ -234,8 +236,9 @@ def main() -> int:
     test: Optional[Dict] = None
     if best_row:
         p = WQAlphaParams(formula_path=args.formula, **best_row["best_params"])
+        test_backtest_start = pd.Timestamp(best_row["valid_span"][1]) - pd.Timedelta(days=2)
         eq = run_backtest(p, args.symbol, args.exec_tf, args.bias_tf, csv_paths,
-                          best_row["valid"][1], test_end.isoformat())
+                          test_backtest_start.isoformat(), test_end.isoformat())
         test = slice_metrics(eq, test_start.isoformat(), test_end.isoformat(), exec_df)
 
     # 4) gates + report
@@ -251,7 +254,7 @@ def main() -> int:
         "windows": results, "test": test, "gates": gates,
         "oos": {"mean_excess_pct": gates["oos_mean_excess_pct"]},
         "overtrade_penalty_per_entry": OVERTRADE_PENALTY,
-        "generated_at": pd.Timestamp.utcnow().isoformat(),
+        "generated_at": pd.Timestamp.now("UTC").isoformat(),
     }
     out = os.path.join(RUNS_DIR, f"{label}.json")
     with open(out, "w") as f:
