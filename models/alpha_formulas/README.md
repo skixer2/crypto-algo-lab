@@ -13,9 +13,15 @@ def calculate_math_signal(df: pd.DataFrame) -> pd.Series
   (`>= 0` = bullish pressure, `<= 0` = bearish pressure; magnitude = conviction).
 - **Causal operations only** — a signal at time t may use data with
   timestamp <= t. No `shift(-n)`, no centered windows, no future leakage.
+- **No full-sample operators**: no global `df.rank()` / `df.mean()` /
+  `df.max()` etc. Every statistic must be trailing (`.rolling(w, min_periods=y)`).
+- **Bounded transforms recommended**: prefer `np.tanh(...)` or rank/z-score
+  scaling INSIDE the formula so thresholds are comparable across formulas.
+  (The wrapper hard-clips to [-1, 1] as the final guarantee regardless.)
 - Imports: `pandas` / `numpy` only. No I/O, no network, no heavy work at
   import time. Deterministic: same df -> same output.
-- NaN handling is done by the wrapper (fillna(0)); early-window NaNs are fine.
+- NaN/Inf handling is centralized in the wrapper (fillna(0) + clip); formulas
+  do NOT need their own fallback code — keep them mathematically pure.
 
 ## Semantics (important)
 
