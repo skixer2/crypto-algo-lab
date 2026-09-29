@@ -167,6 +167,12 @@ class SimulationEngine:
 
             # ── Step 1: Check exit conditions if in position ──────
             if self.position is not None:
+                # Optional model-managed exit hook (backward compatible:
+                # models without manage_position behave exactly as before).
+                if hasattr(self.model, "manage_position"):
+                    reason = self.model.manage_position(self.position, price, ts)
+                    if reason:
+                        self._do_exit(price, ts, f"model_exit:{reason}")
                 if self.position == "long":
                     if price <= self.stop_loss:
                         self._do_exit(price, ts, "stop_loss")

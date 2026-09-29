@@ -77,11 +77,14 @@ def slice_metrics(eq_df: pd.DataFrame, start: str, end: str, bench_df: pd.DataFr
 def run_backtest(params: WQAlphaParams, symbol: str, exec_tf: str, bias_tf: str,
                  csv_paths: Dict[str, str], start: str, end: str) -> Optional[pd.DataFrame]:
     model = WQAlphaMinerModel(params, execution_tf=exec_tf, bias_tfs=[bias_tf])
+    # 3-day lookback pad: saturate model buffers (warmup, EWM smoothing) BEFORE the
+    # measured window starts — removes the 15h+ dead zone at window start (audit Q2).
+    padded_start = (pd.Timestamp(start) - pd.Timedelta(days=3)).isoformat()
     cfg = RunConfig(
         data_files={exec_tf: csv_paths[exec_tf], bias_tf: csv_paths[bias_tf]},
         execution_tf=exec_tf, model=model, initial_capital=10_000.0,
         fee=0.0008, exchange="simulation", allow_shorts=True,
-        data_start=start, data_end=end,
+        data_start=padded_start, data_end=end,
     )
     res = run_strategy(cfg)
     if not res.success or res.equity_curve is None:
@@ -123,23 +126,49 @@ def latest_champion(symbol: str, exec_tf: str) -> Optional[Dict]:
     return None
 
 
-def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Dict]) -> Dict:
+def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Dict],
+                   per_window_floor: float = -1.0, mean_hurdle: float = 2.0,
+                   min_total_entries: int = 50) -> Dict:
     valid_metrics = [w["valid"] for w in windows if w["valid"].get("ok")]
     oos_mean_excess = sum(v["excess_pct"] for v in valid_metrics) / max(len(valid_metrics), 1)
+    total_entries = sum(v["entries"] for v in valid_metrics)
+    if len(valid_metrics) >= 2:
+        vals = [v["excess_pct"] for v in valid_metrics]
+        mu = sum(vals) / len(vals)
+        sd = (sum((x - mu) ** 2 for x in vals) / len(vals)) ** 0.5
+        t_score = round(mu / sd, 2) if sd > 0 else (99.0 if mu > 0 else 0.0)
+    else:
+        t_score = None
     floor_windows = [v for v in valid_metrics if v["bench_pct"] < 0]
     floor_ok = all(v["return_pct"] >= 0 for v in floor_windows) if floor_windows else True
-    market_beat = oos_mean_excess > 0 and (test is None or (test.get("ok") and test["excess_pct"] > 0))
-    test_floor_ok = (test is None) or (not test.get("ok")) or (test["bench_pct"] >= 0 or test["return_pct"] >= 0)
+    per_window_ok = bool(valid_metrics) and all(v["excess_pct"] > per_window_floor for v in valid_metrics)
+    mean_ok = oos_mean_excess > mean_hurdle
+    entries_ok = total_entries >= min_total_entries
+    test_ok = test is not None and test.get("ok")
+    test_beat = test_ok and test["excess_pct"] > 0
+    test_floor_ok = (not test_ok) or (test["bench_pct"] >= 0 or test["return_pct"] >= 0)
     edge = {"champion": champ["label"] if champ else None,
             "champion_oos_mean_excess": champ["oos"]["mean_excess_pct"] if champ else None,
             "passed": None}
     if champ is not None:
         edge["passed"] = oos_mean_excess > champ["oos"]["mean_excess_pct"]
-    verdict = "PROMOTE" if (market_beat and floor_ok and test_floor_ok and (edge["passed"] is not False)) else "REJECT"
+    failed = []
+    if not per_window_ok: failed.append(f"per_window_floor({per_window_floor})")
+    if not mean_ok: failed.append(f"mean_hurdle({mean_hurdle})")
+    if not entries_ok: failed.append(f"min_total_entries({min_total_entries}, got {total_entries})")
+    if not floor_ok: failed.append("capital_floor")
+    if not test_beat: failed.append("test_market_beat")
+    if not test_floor_ok: failed.append("test_floor")
+    if edge["passed"] is False: failed.append("edge_vs_champion")
+    verdict = "PROMOTE" if not failed else "REJECT"
     return {"oos_mean_excess_pct": round(oos_mean_excess, 3),
+            "oos_total_entries": total_entries, "consistency_t_score": t_score,
             "floor_windows": len(floor_windows), "capital_floor_passed": floor_ok,
-            "market_beat_passed": market_beat, "test_floor_passed": test_floor_ok,
-            "edge": edge, "verdict": verdict}
+            "per_window_floor_passed": per_window_ok, "mean_hurdle_passed": mean_ok,
+            "entries_gate_passed": entries_ok,
+            "market_beat_passed": per_window_ok and mean_ok and test_beat,
+            "test_floor_passed": test_floor_ok,
+            "edge": edge, "failed_gates": failed, "verdict": verdict}
 
 
 # ── main ──────────────────────────────────────────────────────────────
@@ -158,6 +187,9 @@ def main() -> int:
     ap.add_argument("--valid-days", type=int, default=7)
     ap.add_argument("--slide-days", type=int, default=7)
     ap.add_argument("--test-days", type=int, default=10)
+    ap.add_argument("--per-window-floor", type=float, default=-1.0)
+    ap.add_argument("--mean-hurdle", type=float, default=2.0)
+    ap.add_argument("--min-total-entries", type=int, default=50)
     ap.add_argument("--label", default=None)
     args = ap.parse_args()
 
@@ -198,6 +230,8 @@ def main() -> int:
             atr_stop_mult=trial.suggest_float("atr_stop_mult", 1.0, 4.0),
             atr_take_mult=trial.suggest_float("atr_take_mult", 1.0, 5.0),
             use_bias_filter=trial.suggest_categorical("use_bias_filter", [True, False]),
+            signal_exit_threshold=trial.suggest_categorical(
+                "signal_exit_threshold", [None, 0.3, 0.4, 0.5]),
         )
 
     results: List[Dict] = []
@@ -243,7 +277,10 @@ def main() -> int:
 
     # 4) gates + report
     champ = latest_champion(args.symbol, args.exec_tf)
-    gates = evaluate_gates(results, test, champ)
+    gates = evaluate_gates(results, test, champ,
+                           per_window_floor=args.per_window_floor,
+                           mean_hurdle=args.mean_hurdle,
+                           min_total_entries=args.min_total_entries)
     report = {
         "label": label, "formula": args.formula,
         "formula_hash": WQAlphaMinerModel(

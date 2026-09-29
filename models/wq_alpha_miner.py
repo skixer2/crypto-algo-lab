@@ -48,6 +48,7 @@ class WQAlphaParams:
     use_bias_filter: bool = True      # EMA fast/slow on first bias TF gates direction
     bias_fast: int = 50
     bias_slow: int = 200
+    signal_exit_threshold: Optional[float] = None  # exit held position when signal flips beyond this (None = off)
 
 
 class WQAlphaMinerModel:
@@ -94,6 +95,9 @@ class WQAlphaMinerModel:
         self._buffers: Dict[str, List[dict]] = {tf: [] for tf in [execution_tf] + self.bias_tfs}
         self._last_indicators: Dict = {}
         self._formula_error_logged = False
+        # EWM smoothing needs ~3 spans of history to converge — enforce it in warmup
+        # so early signals aren't under-smoothed vs long backtests (audit 2026-09-29).
+        self._min_history = max(int(self.p.warmup_candles), 3 * int(self.p.signal_smoothing or 1))
 
     # ── Module 3 contract ──────────────────────────────────────────
 
@@ -112,7 +116,7 @@ class WQAlphaMinerModel:
 
     def predict(self, allow_shorts: bool = True) -> Tuple[Action, float, Dict]:
         buf = self._buffers[self.execution_tf]
-        if len(buf) < self.p.warmup_candles:
+        if len(buf) < self._min_history:
             return "flat", 0.0, self._last_indicators
 
         df = pd.DataFrame(buf).set_index("timestamp")
@@ -154,6 +158,29 @@ class WQAlphaMinerModel:
 
     def get_indicators(self) -> Dict:
         return self._last_indicators
+
+    def manage_position(self, position: str, price: float, ts) -> Optional[str]:
+        """Engine hook (optional, called every tick while IN POSITION — see
+        framework/simulation.py). Returns an exit reason to force an immediate
+        close, or None to hold. Implements Gemini's signal-flip exit proposal
+        (2026-09-29 audit) through a REAL engine hook: mutating indicator dicts
+        has no effect on the engine's own stop_loss/take_profit fields.
+        """
+        if self.p.signal_exit_threshold is None:
+            return None
+        buf = self._buffers[self.execution_tf]
+        if len(buf) < self._min_history:
+            return None
+        df = pd.DataFrame(buf).set_index("timestamp")
+        sig = self._compute_signal(df)
+        if sig is None:
+            return None
+        self._last_indicators["manage_signal"] = round(sig, 4)
+        if position == "long" and sig <= -self.p.signal_exit_threshold:
+            return "signal_flip"
+        if position == "short" and sig >= self.p.signal_exit_threshold:
+            return "signal_flip"
+        return None
 
     # ── internals ──────────────────────────────────────────────────
 
