@@ -41,6 +41,7 @@ sys.path.insert(0, REPO_ROOT)
 from framework.data_loader import load_candles          # noqa: E402
 from framework.runner import RunConfig, run_strategy     # noqa: E402
 from models.wq_alpha_miner import WQAlphaMinerModel, WQAlphaParams  # noqa: E402
+from models.wq_alpha_fast import prepare_fast_context    # noqa: E402
 
 logging.basicConfig(level=logging.WARNING, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("orchestrator")
@@ -75,8 +76,13 @@ def slice_metrics(eq_df: pd.DataFrame, start: str, end: str, bench_df: pd.DataFr
 
 
 def run_backtest(params: WQAlphaParams, symbol: str, exec_tf: str, bias_tf: str,
-                 csv_paths: Dict[str, str], start: str, end: str) -> Optional[pd.DataFrame]:
-    model = WQAlphaMinerModel(params, execution_tf=exec_tf, bias_tfs=[bias_tf])
+                 csv_paths: Dict[str, str], start: str, end: str,
+                 ctx=None) -> Optional[pd.DataFrame]:
+    if ctx is not None:
+        from models.wq_alpha_fast import FastWQAlphaMinerModel
+        model = FastWQAlphaMinerModel(params, ctx, execution_tf=exec_tf, bias_tfs=[bias_tf])
+    else:
+        model = WQAlphaMinerModel(params, execution_tf=exec_tf, bias_tfs=[bias_tf])
     # 3-day lookback pad: saturate model buffers (warmup, EWM smoothing) BEFORE the
     # measured window starts — removes the 15h+ dead zone at window start (audit Q2).
     padded_start = (pd.Timestamp(start) - pd.Timedelta(days=3)).isoformat()
@@ -191,6 +197,9 @@ def main() -> int:
     ap.add_argument("--mean-hurdle", type=float, default=2.0)
     ap.add_argument("--min-total-entries", type=int, default=50)
     ap.add_argument("--label", default=None)
+    ap.add_argument("--reference", action="store_true",
+                    help="force the incremental reference model (39x slower; "
+                         "for cross-checking after formula/engine changes)")
     args = ap.parse_args()
 
     import optuna
@@ -211,6 +220,11 @@ def main() -> int:
         log.warning(f"  -> {n} candles: {path}")
     exec_df = pd.read_csv(csv_paths[args.exec_tf], parse_dates=["timestamp"], index_col="timestamp")
     exec_df = exec_df[(exec_df.index >= args.start) & (exec_df.index <= args.end)]
+
+    ctx = None
+    if not args.reference:
+        ctx = prepare_fast_context(csv_paths[args.exec_tf], csv_paths[args.bias_tf], args.formula)
+        log.warning("fast path enabled (equivalence-verified 6/6, 39x)")
 
     data_start, data_end = exec_df.index[0], exec_df.index[-1]
     test_end = data_end
@@ -241,7 +255,7 @@ def main() -> int:
         def objective(trial):
             p = make_params(trial)
             eq = run_backtest(p, args.symbol, args.exec_tf, args.bias_tf, csv_paths,
-                              w["train"][0], w["valid"][1])
+                              w["train"][0], w["valid"][1], ctx=ctx)
             if eq is None:
                 raise optuna.TrialPruned()
             tm = slice_metrics(eq, *w["train"], exec_df)
@@ -255,7 +269,7 @@ def main() -> int:
 
         best = WQAlphaParams(formula_path=args.formula, **study.best_params)
         eq = run_backtest(best, args.symbol, args.exec_tf, args.bias_tf, csv_paths,
-                          w["train"][0], w["valid"][1])
+                          w["train"][0], w["valid"][1], ctx=ctx)
         tm = slice_metrics(eq, *w["train"], exec_df)
         vm = slice_metrics(eq, *w["valid"], exec_df)
         results.append({"train_span": w["train"], "valid_span": w["valid"],
@@ -272,7 +286,7 @@ def main() -> int:
         p = WQAlphaParams(formula_path=args.formula, **best_row["best_params"])
         test_backtest_start = pd.Timestamp(best_row["valid_span"][1]) - pd.Timedelta(days=2)
         eq = run_backtest(p, args.symbol, args.exec_tf, args.bias_tf, csv_paths,
-                          test_backtest_start.isoformat(), test_end.isoformat())
+                          test_backtest_start.isoformat(), test_end.isoformat(), ctx=ctx)
         test = slice_metrics(eq, test_start.isoformat(), test_end.isoformat(), exec_df)
 
     # 4) gates + report
