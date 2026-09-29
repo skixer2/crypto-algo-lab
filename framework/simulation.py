@@ -73,6 +73,7 @@ class SimulationEngine:
         exchange: str = "simulation",
         create_graphs: bool = False,
         allow_shorts: bool = False,
+        allow_same_tick_reversal: bool = False,
     ):
         self.model = model
         self.initial_capital = initial_capital
@@ -80,6 +81,7 @@ class SimulationEngine:
         self.exchange = exchange
         self.create_graphs = create_graphs
         self.allow_shorts = allow_shorts
+        self.allow_same_tick_reversal = allow_same_tick_reversal
 
         # ── Financial state (single source of truth) ──────────────
         self.cash: float = initial_capital
@@ -166,26 +168,39 @@ class SimulationEngine:
             self.model.update(row, execution_tf)
 
             # ── Step 1: Check exit conditions if in position ──────
+            # exited_this_tick gates Step 2 so an exit and a fresh entry never
+            # share the same candle close (unless allow_same_tick_reversal).
+            # NOTE: no `continue` here — Step 3 must ALWAYS record equity,
+            # otherwise the equity curve gets gaps (hard rule).
+            exited_this_tick = False
             if self.position is not None:
-                # Optional model-managed exit hook (backward compatible:
-                # models without manage_position behave exactly as before).
-                if hasattr(self.model, "manage_position"):
-                    reason = self.model.manage_position(self.position, price, ts)
-                    if reason:
-                        self._do_exit(price, ts, f"model_exit:{reason}")
+                # Physical stops FIRST: the risk floor always outranks model
+                # logic (audit R3-B, Gemini round 2, accepted).
                 if self.position == "long":
                     if price <= self.stop_loss:
                         self._do_exit(price, ts, "stop_loss")
+                        exited_this_tick = True
                     elif price >= self.take_profit:
                         self._do_exit(price, ts, "take_profit")
+                        exited_this_tick = True
                 elif self.position == "short":
                     if price >= self.stop_loss:
                         self._do_exit(price, ts, "stop_loss")
+                        exited_this_tick = True
                     elif price <= self.take_profit:
                         self._do_exit(price, ts, "take_profit")
+                        exited_this_tick = True
+                # Model-managed exit SECOND (structural/rule-based exits).
+                if not exited_this_tick and hasattr(self.model, "manage_position"):
+                    reason = self.model.manage_position(self.position, price, ts)
+                    if reason:
+                        self._do_exit(price, ts, f"model_exit:{reason}")
+                        exited_this_tick = True
 
             # ── Step 2: Check for new entry signal ────────────────
-            if self.position is None:
+            if self.position is None and (
+                self.allow_same_tick_reversal or not exited_this_tick
+            ):
                 action, size_pct, indicators = self.model.predict(
                     allow_shorts=self.allow_shorts
                 )
