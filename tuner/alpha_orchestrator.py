@@ -77,7 +77,7 @@ def slice_metrics(eq_df: pd.DataFrame, start: str, end: str, bench_df: pd.DataFr
 
 def run_backtest(params: WQAlphaParams, symbol: str, exec_tf: str, bias_tf: str,
                  csv_paths: Dict[str, str], start: str, end: str,
-                 ctx=None) -> Optional[pd.DataFrame]:
+                 ctx=None, allow_shorts: bool = True, fee: float = 0.0008) -> Optional[pd.DataFrame]:
     if ctx is not None:
         from models.wq_alpha_fast import FastWQAlphaMinerModel
         model = FastWQAlphaMinerModel(params, ctx, execution_tf=exec_tf, bias_tfs=[bias_tf])
@@ -89,7 +89,7 @@ def run_backtest(params: WQAlphaParams, symbol: str, exec_tf: str, bias_tf: str,
     cfg = RunConfig(
         data_files={exec_tf: csv_paths[exec_tf], bias_tf: csv_paths[bias_tf]},
         execution_tf=exec_tf, model=model, initial_capital=10_000.0,
-        fee=0.0008, exchange="simulation", allow_shorts=True,
+        fee=fee, exchange="simulation", allow_shorts=allow_shorts,
         data_start=padded_start, data_end=end,
     )
     res = run_strategy(cfg)
@@ -144,7 +144,8 @@ def run_champion_windows(params, args, csv_paths, windows, exec_df, ctx):
     sharpes, excesses = [], []
     for w in windows:
         eq = run_backtest(params, args.symbol, args.exec_tf, args.bias_tf, csv_paths,
-                          w["train"][0], w["valid"][1], ctx=ctx)
+                          w["train"][0], w["valid"][1], ctx=ctx,
+                          allow_shorts=not args.no_shorts, fee=args.fee)
         if eq is None:
             continue
         vm = slice_metrics(eq, *w["valid"], exec_df)
@@ -203,7 +204,8 @@ def cross_asset_report(best_params_dict, args, windows, data_start, data_end):
     for w in windows:
         eq = run_backtest(p, "BTC/USDT", args.exec_tf, args.bias_tf,
                           {args.exec_tf: b_exec, args.bias_tf: b_bias},
-                          w["train"][0], w["valid"][1], ctx=ctx_btc)
+                          w["train"][0], w["valid"][1], ctx=ctx_btc,
+                          allow_shorts=not args.no_shorts, fee=args.fee)
         if eq is None:
             continue
         vm = slice_metrics(eq, *w["valid"], btc_exec)
@@ -352,6 +354,10 @@ def main() -> int:
     ap.add_argument("--mean-hurdle", type=float, default=2.0)
     ap.add_argument("--min-total-entries", type=int, default=50)
     ap.add_argument("--label", default=None)
+    ap.add_argument("--no-shorts", action="store_true",
+                    help="long-only study (Phase 2 / Revolut variant)")
+    ap.add_argument("--fee", type=float, default=0.0008,
+                    help="per-side fee (Revolut X: use its real schedule)")
     ap.add_argument("--reference", action="store_true",
                     help="force the incremental reference model (39x slower; "
                          "for cross-checking after formula/engine changes)")
@@ -410,7 +416,8 @@ def main() -> int:
         def objective(trial):
             p = make_params(trial)
             eq = run_backtest(p, args.symbol, args.exec_tf, args.bias_tf, csv_paths,
-                              w["train"][0], w["valid"][1], ctx=ctx)
+                              w["train"][0], w["valid"][1], ctx=ctx,
+                              allow_shorts=not args.no_shorts, fee=args.fee)
             if eq is None:
                 raise optuna.TrialPruned()
             tm = slice_metrics(eq, *w["train"], exec_df)
@@ -424,7 +431,8 @@ def main() -> int:
 
         best = WQAlphaParams(formula_path=args.formula, **study.best_params)
         eq = run_backtest(best, args.symbol, args.exec_tf, args.bias_tf, csv_paths,
-                          w["train"][0], w["valid"][1], ctx=ctx)
+                          w["train"][0], w["valid"][1], ctx=ctx,
+                          allow_shorts=not args.no_shorts, fee=args.fee)
         tm = slice_metrics(eq, *w["train"], exec_df)
         vm = slice_metrics(eq, *w["valid"], exec_df)
         results.append({"train_span": w["train"], "valid_span": w["valid"],
@@ -441,7 +449,8 @@ def main() -> int:
         p = WQAlphaParams(formula_path=args.formula, **best_row["best_params"])
         test_backtest_start = pd.Timestamp(best_row["valid_span"][1]) - pd.Timedelta(days=2)
         eq = run_backtest(p, args.symbol, args.exec_tf, args.bias_tf, csv_paths,
-                          test_backtest_start.isoformat(), test_end.isoformat(), ctx=ctx)
+                          test_backtest_start.isoformat(), test_end.isoformat(), ctx=ctx,
+                          allow_shorts=not args.no_shorts, fee=args.fee)
         test = slice_metrics(eq, test_start.isoformat(), test_end.isoformat(), exec_df)
 
     # 4) post-selection robustness gates (champion params only)
@@ -480,6 +489,7 @@ def main() -> int:
         "noise": noise_result, "cross_asset": cross_asset,
         "oos": {"mean_excess_pct": gates["oos_mean_excess_pct"]},
         "overtrade_penalty_per_entry": OVERTRADE_PENALTY,
+        "allow_shorts": not args.no_shorts, "fee": args.fee,
         "generated_at": pd.Timestamp.now("UTC").isoformat(),
     }
     out = os.path.join(RUNS_DIR, f"{label}.json")
