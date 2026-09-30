@@ -132,9 +132,97 @@ def latest_champion(symbol: str, exec_tf: str) -> Optional[Dict]:
     return None
 
 
+# ── post-selection robustness gates (Gemini round-4 spec, adapted) ─────
+
+PERTURB_FACTORS = (0.975, 0.9875, 1.0125, 1.025)
+# Deviation from Gemini's spec: 1.0 excluded — self-inclusion biases the
+# noise mean upward with the unperturbed base run.
+
+
+def run_champion_windows(params, args, csv_paths, windows, exec_df, ctx):
+    """Rerun ONE fixed param set across every window; OOS valid-slice metrics."""
+    sharpes, excesses = [], []
+    for w in windows:
+        eq = run_backtest(params, args.symbol, args.exec_tf, args.bias_tf, csv_paths,
+                          w["train"][0], w["valid"][1], ctx=ctx)
+        if eq is None:
+            continue
+        vm = slice_metrics(eq, *w["valid"], exec_df)
+        if vm.get("ok"):
+            sharpes.append(vm["sharpe"])
+            excesses.append(vm["excess_pct"])
+    return sharpes, excesses
+
+
+def noise_stability_check(best_params_dict, args, csv_paths, windows, exec_df, ctx):
+    """Parametric noise gate: perturb thresholds/stops +/-2.5%, rerun all
+    windows, require mean perturbed OOS Sharpe >= 75% of base (collapse cap)."""
+    base = WQAlphaParams(formula_path=args.formula, **best_params_dict)
+    b_sharpes, _ = run_champion_windows(base, args, csv_paths, windows, exec_df, ctx)
+    base_sharpe = (sum(b_sharpes) / len(b_sharpes)) if b_sharpes else None
+    if not base_sharpe or base_sharpe <= 0:
+        return {"base_sharpe": base_sharpe, "ratio": None, "passed": False,
+                "note": "base OOS Sharpe <= 0: no stable edge to perturb"}
+    n_sharpes = []
+    for f in PERTURB_FACTORS:
+        p = WQAlphaParams(
+            formula_path=args.formula,
+            long_threshold=min(base.long_threshold * f, 0.999),
+            short_threshold=min(base.short_threshold * f, 0.999),
+            atr_stop_mult=base.atr_stop_mult * f,
+            atr_take_mult=base.atr_take_mult * f,
+            signal_smoothing=base.signal_smoothing,
+            use_bias_filter=base.use_bias_filter,
+            signal_exit_threshold=(base.signal_exit_threshold * f
+                                   if base.signal_exit_threshold is not None else None),
+        )
+        sh, _ = run_champion_windows(p, args, csv_paths, windows, exec_df, ctx)
+        n_sharpes.extend(sh)
+    mean_noise = (sum(n_sharpes) / len(n_sharpes)) if n_sharpes else None
+    ratio = round(mean_noise / base_sharpe, 3) if mean_noise is not None else None
+    return {"base_sharpe": round(base_sharpe, 3),
+            "mean_noise_sharpe": round(mean_noise, 3) if mean_noise is not None else None,
+            "ratio": ratio, "threshold": 0.75, "factors": list(PERTURB_FACTORS),
+            "passed": bool(ratio is not None and ratio >= 0.75)}
+
+
+def cross_asset_report(best_params_dict, args, windows, data_start, data_end):
+    """Untuned transfer: ETH-optimized params on BTC/USDT. INFORMATIONAL —
+    sign preservation observed before any hard-gating (round-3 agreement)."""
+    base = os.path.join(REPO_ROOT, "framework", "data_cache")
+    tag = f"{data_start.replace('-', '')}_{data_end.replace('-', '')}"
+    b_exec = os.path.join(base, f"okx_BTC_USDT_{args.exec_tf}_{tag}.csv")
+    b_bias = os.path.join(base, f"okx_BTC_USDT_{args.bias_tf}_{tag}.csv")
+    if not (os.path.isfile(b_exec) and os.path.isfile(b_bias)):
+        return {"skipped": f"no BTC cache for {tag}"}
+    ctx_btc = prepare_fast_context(b_exec, b_bias, args.formula)
+    btc_exec = pd.read_csv(b_exec, parse_dates=["timestamp"], index_col="timestamp")
+    btc_exec = btc_exec[(btc_exec.index >= data_start) & (btc_exec.index <= data_end)]
+    p = WQAlphaParams(formula_path=args.formula, **best_params_dict)
+    rows = []
+    for w in windows:
+        eq = run_backtest(p, "BTC/USDT", args.exec_tf, args.bias_tf,
+                          {args.exec_tf: b_exec, args.bias_tf: b_bias},
+                          w["train"][0], w["valid"][1], ctx=ctx_btc)
+        if eq is None:
+            continue
+        vm = slice_metrics(eq, *w["valid"], btc_exec)
+        if vm.get("ok"):
+            rows.append(vm)
+    if not rows:
+        return {"skipped": "no valid BTC windows"}
+    mean_ex = sum(v["excess_pct"] for v in rows) / len(rows)
+    pos = sum(1 for v in rows if v["excess_pct"] > 0)
+    return {"asset": "BTC/USDT", "windows": len(rows),
+            "mean_excess_pct": round(mean_ex, 3),
+            "positive_windows": f"{pos}/{len(rows)}",
+            "note": "informational: untuned transfer of ETH-optimized params"}
+
+
 def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Dict],
                    per_window_floor: float = -1.0, mean_hurdle: float = 2.0,
-                   min_total_entries: int = 50) -> Dict:
+                   min_total_entries: int = 50,
+                   noise_result: Optional[Dict] = None) -> Dict:
     valid_metrics = [w["valid"] for w in windows if w["valid"].get("ok")]
     oos_mean_excess = sum(v["excess_pct"] for v in valid_metrics) / max(len(valid_metrics), 1)
     total_entries = sum(v["entries"] for v in valid_metrics)
@@ -166,6 +254,8 @@ def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Di
     if not test_beat: failed.append("test_market_beat")
     if not test_floor_ok: failed.append("test_floor")
     if edge["passed"] is False: failed.append("edge_vs_champion")
+    if noise_result is not None and not noise_result.get("passed", False):
+        failed.append("noise_stability")
     verdict = "PROMOTE" if not failed else "REJECT"
     return {"oos_mean_excess_pct": round(oos_mean_excess, 3),
             "oos_total_entries": total_entries, "consistency_t_score": t_score,
@@ -289,12 +379,30 @@ def main() -> int:
                           test_backtest_start.isoformat(), test_end.isoformat(), ctx=ctx)
         test = slice_metrics(eq, test_start.isoformat(), test_end.isoformat(), exec_df)
 
-    # 4) gates + report
+    # 4) post-selection robustness gates (champion params only)
+    noise_result = None
+    cross_asset = None
+    if best_row:
+        noise_result = noise_stability_check(best_row["best_params"], args, csv_paths,
+                                             windows, exec_df, ctx)
+        log.warning(f"noise gate: base={noise_result.get('base_sharpe')} "
+                    f"noise={noise_result.get('mean_noise_sharpe')} "
+                    f"ratio={noise_result.get('ratio')} passed={noise_result.get('passed')}")
+        cross_asset = cross_asset_report(best_row["best_params"], args, windows,
+                                         args.start, args.end)
+        if cross_asset.get("skipped"):
+            log.warning(f"cross-asset: {cross_asset['skipped']}")
+        else:
+            log.warning(f"cross-asset BTC: mean excess {cross_asset['mean_excess_pct']}% "
+                        f"(positive {cross_asset['positive_windows']})")
+
+    # 5) gates + report
     champ = latest_champion(args.symbol, args.exec_tf)
     gates = evaluate_gates(results, test, champ,
                            per_window_floor=args.per_window_floor,
                            mean_hurdle=args.mean_hurdle,
-                           min_total_entries=args.min_total_entries)
+                           min_total_entries=args.min_total_entries,
+                           noise_result=noise_result)
     report = {
         "label": label, "formula": args.formula,
         "formula_hash": WQAlphaMinerModel(
@@ -303,6 +411,7 @@ def main() -> int:
         "symbol": args.symbol, "exec_tf": args.exec_tf, "bias_tf": args.bias_tf,
         "data": {"start": str(data_start), "end": str(data_end), "candles": len(exec_df)},
         "windows": results, "test": test, "gates": gates,
+        "noise": noise_result, "cross_asset": cross_asset,
         "oos": {"mean_excess_pct": gates["oos_mean_excess_pct"]},
         "overtrade_penalty_per_entry": OVERTRADE_PENALTY,
         "generated_at": pd.Timestamp.now("UTC").isoformat(),
