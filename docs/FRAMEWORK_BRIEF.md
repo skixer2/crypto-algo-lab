@@ -147,14 +147,28 @@ Rules for a model implementation:
 7. Compare against **buy & hold** always — a strategy that loses to B&H in its
    own test window is not deployable.
 
-## 10. Promotion gates for any proposed strategy/model
+## 10. Promotion gates — THE CHARTER (project owner, 2026-09-30; supersedes 2026-09-20)
 
-A challenger replaces the incumbent only if ALL hold on out-of-sample windows:
+MISSION: beat buy & hold SIGNIFICANTLY over the MEDIUM TERM — not every day,
+not every window. The edge equation: medium-term excess = (what you keep from
+uptrends) − (what you lose in drawdowns). Win by losing less when the market
+falls, while riding enough of every rise.
 
-1. **Edge**: OOS return > incumbent's OOS return (max drawdown not worse by >2 pts).
-2. **Market beat**: OOS return > naive buy & hold on the same window.
-3. **Capital floor** (project owner rule, 2026-09-20): in OOS windows where
-   BOTH the incumbent and buy & hold lose money, the challenger must return ≥ 0.
+Hard rules per OOS window (benchmark bucket decides the rule):
+1. DOWN-SHIELD: bench ≤ 0 → strategy ≥ 0. Bleeding while the market bleeds
+   disqualifies you, whatever your rallies look like.
+2. UPTREND PARTICIPATION: 0 < bench < +15% → capture ≥ 30% of the move.
+   Sitting out ordinary rallies is failure.
+3. EXTREME MELT-UPS: bench ≥ +15% → participation only (strategy > 0).
+   Vertical weeks reward holders, not traders. Don't chase, don't fear.
+4. MEDIUM-TERM EDGE (aggregate): OOS mean excess ≥ +2%, consistency t > 0,
+   ≥ 50 OOS entries, parameter-noise stability gate, test window obeys its
+   bucket rule, and edge over the incumbent champion when one exists.
+
+Design implication for formulas: ASYMMETRY beats symmetry — fast trend
+entries with tight risk. Flat-in-drops + partial-long-in-rallies passes;
+beats-rallies-but-bleeds-in-drops fails; trades-everything-captures-nothing
+fails. Reports list per-window bucket verdicts: read them as your fix list.
 
 ## 11. What you may be asked to do
 

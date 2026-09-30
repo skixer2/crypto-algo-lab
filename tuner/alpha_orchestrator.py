@@ -220,9 +220,19 @@ def cross_asset_report(best_params_dict, args, windows, data_start, data_end):
 
 
 def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Dict],
-                   per_window_floor: float = -1.0, mean_hurdle: float = 2.0,
-                   min_total_entries: int = 50,
+                   mean_hurdle: float = 2.0, min_total_entries: int = 50,
+                   participation_floor: float = 0.3, extreme_bench: float = 15.0,
                    noise_result: Optional[Dict] = None) -> Dict:
+    """JP charter gates (2026-09-30): beat B&H significantly on the MEDIUM TERM
+    by (a) never losing when the market loses, (b) participating in uptrends.
+
+    Per-OOS-window hard rules by benchmark bucket:
+      bench <= 0        -> strat >= 0            (down-shield / capital floor)
+      0 < bench < +X%   -> strat >= p * bench    (uptrend participation, p=0.3)
+      bench >= +X%      -> strat > 0             (extreme melt-up: participate only)
+    Plus aggregate: OOS mean excess > mean_hurdle AND consistency t > 0,
+    entries >= min, test window obeys its bucket rule, noise + edge gates.
+    """
     valid_metrics = [w["valid"] for w in windows if w["valid"].get("ok")]
     oos_mean_excess = sum(v["excess_pct"] for v in valid_metrics) / max(len(valid_metrics), 1)
     total_entries = sum(v["entries"] for v in valid_metrics)
@@ -233,38 +243,82 @@ def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Di
         t_score = round(mu / sd, 2) if sd > 0 else (99.0 if mu > 0 else 0.0)
     else:
         t_score = None
-    floor_windows = [v for v in valid_metrics if v["bench_pct"] < 0]
-    floor_ok = all(v["return_pct"] >= 0 for v in floor_windows) if floor_windows else True
-    per_window_ok = bool(valid_metrics) and all(v["excess_pct"] > per_window_floor for v in valid_metrics)
+
+    def bucket_rule(bench: float, strat: float) -> Dict:
+        if bench <= 0:
+            return {"bucket": "down_shield", "required": "strat >= 0",
+                    "pass": strat >= 0}
+        if bench >= extreme_bench:
+            return {"bucket": "extreme_participation", "required": "strat > 0",
+                    "pass": strat > 0}
+        req = participation_floor * bench
+        return {"bucket": "uptrend_participation",
+                "required": f"strat >= {participation_floor:.0%} x bench ({req:.2f})",
+                "pass": strat >= req}
+
+    window_rules = []
+    for w in windows:
+        v = w["valid"]
+        if not v.get("ok"):
+            continue
+        r = bucket_rule(v["bench_pct"], v["return_pct"])
+        r["span"] = w["valid_span"][0][:10] + ".." + w["valid_span"][1][:10]
+        r["bench"] = v["bench_pct"]; r["strat"] = v["return_pct"]
+        window_rules.append(r)
+
+    down_shield_ok = all(r["pass"] for r in window_rules if r["bucket"] == "down_shield") \
+        if any(r["bucket"] == "down_shield" for r in window_rules) else True
+    participation_ok = all(r["pass"] for r in window_rules
+                           if r["bucket"] == "uptrend_participation") \
+        if any(r["bucket"] == "uptrend_participation" for r in window_rules) else True
+    extreme_ok = all(r["pass"] for r in window_rules
+                     if r["bucket"] == "extreme_participation") \
+        if any(r["bucket"] == "extreme_participation" for r in window_rules) else True
+
     mean_ok = oos_mean_excess > mean_hurdle
+    t_ok = (t_score is not None and t_score > 0)
     entries_ok = total_entries >= min_total_entries
-    test_ok = test is not None and test.get("ok")
-    test_beat = test_ok and test["excess_pct"] > 0
-    test_floor_ok = (not test_ok) or (test["bench_pct"] >= 0 or test["return_pct"] >= 0)
+
+    test_rule, test_ok = None, True
+    if test is not None and test.get("ok"):
+        test_rule = bucket_rule(test["bench_pct"], test["return_pct"])
+        test_rule.update({"bench": test["bench_pct"], "strat": test["return_pct"]})
+        test_ok = test_rule["pass"]
+
     edge = {"champion": champ["label"] if champ else None,
             "champion_oos_mean_excess": champ["oos"]["mean_excess_pct"] if champ else None,
             "passed": None}
     if champ is not None:
         edge["passed"] = oos_mean_excess > champ["oos"]["mean_excess_pct"]
+
     failed = []
-    if not per_window_ok: failed.append(f"per_window_floor({per_window_floor})")
-    if not mean_ok: failed.append(f"mean_hurdle({mean_hurdle})")
+    if not down_shield_ok: failed.append("down_shield(capital_floor)")
+    if not participation_ok: failed.append(f"uptrend_participation({participation_floor:.0%})")
+    if not extreme_ok: failed.append(f"extreme_participation(bench>={extreme_bench}%)")
+    if not mean_ok: failed.append(f"medium_term_edge({mean_hurdle}%)")
+    if not t_ok: failed.append("consistency(t>0)")
     if not entries_ok: failed.append(f"min_total_entries({min_total_entries}, got {total_entries})")
-    if not floor_ok: failed.append("capital_floor")
-    if not test_beat: failed.append("test_market_beat")
-    if not test_floor_ok: failed.append("test_floor")
-    if edge["passed"] is False: failed.append("edge_vs_champion")
+    if not test_ok: failed.append(f"test_charter({test_rule['bucket'] if test_rule else '?'})")
     if noise_result is not None and not noise_result.get("passed", False):
         failed.append("noise_stability")
+    if edge["passed"] is False: failed.append("edge_vs_champion")
+
     verdict = "PROMOTE" if not failed else "REJECT"
     return {"oos_mean_excess_pct": round(oos_mean_excess, 3),
             "oos_total_entries": total_entries, "consistency_t_score": t_score,
-            "floor_windows": len(floor_windows), "capital_floor_passed": floor_ok,
-            "per_window_floor_passed": per_window_ok, "mean_hurdle_passed": mean_ok,
+            "window_rules": window_rules,
+            "down_shield_passed": down_shield_ok,
+            "uptrend_participation_passed": participation_ok,
+            "extreme_participation_passed": extreme_ok,
+            "medium_term_edge_passed": mean_ok, "consistency_passed": t_ok,
             "entries_gate_passed": entries_ok,
-            "market_beat_passed": per_window_ok and mean_ok and test_beat,
-            "test_floor_passed": test_floor_ok,
-            "edge": edge, "failed_gates": failed, "verdict": verdict}
+            "test_rule": test_rule, "test_charter_passed": test_ok,
+            "edge": edge, "failed_gates": failed, "verdict": verdict,
+            "charter": "JP 2026-09-30: medium-term significant outperformance via "
+                       "down-shield (bench<=0 -> strat>=0), uptrend participation "
+                       f"(>= {participation_floor:.0%} of bench), extreme melt-ups "
+                       f"(bench >= +{extreme_bench}% -> strat>0), mean excess > "
+                       f"{mean_hurdle}% with t>0"}
 
 
 # ── main ──────────────────────────────────────────────────────────────
@@ -283,7 +337,8 @@ def main() -> int:
     ap.add_argument("--valid-days", type=int, default=7)
     ap.add_argument("--slide-days", type=int, default=7)
     ap.add_argument("--test-days", type=int, default=10)
-    ap.add_argument("--per-window-floor", type=float, default=-1.0)
+    ap.add_argument("--participation-floor", type=float, default=0.3)
+    ap.add_argument("--extreme-bench", type=float, default=15.0)
     ap.add_argument("--mean-hurdle", type=float, default=2.0)
     ap.add_argument("--min-total-entries", type=int, default=50)
     ap.add_argument("--label", default=None)
@@ -399,9 +454,10 @@ def main() -> int:
     # 5) gates + report
     champ = latest_champion(args.symbol, args.exec_tf)
     gates = evaluate_gates(results, test, champ,
-                           per_window_floor=args.per_window_floor,
                            mean_hurdle=args.mean_hurdle,
                            min_total_entries=args.min_total_entries,
+                           participation_floor=args.participation_floor,
+                           extreme_bench=args.extreme_bench,
                            noise_result=noise_result)
     report = {
         "label": label, "formula": args.formula,
