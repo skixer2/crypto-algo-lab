@@ -278,6 +278,13 @@ def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Di
     mean_ok = oos_mean_excess > mean_hurdle
     t_ok = (t_score is not None and t_score > 0)
     entries_ok = total_entries >= min_total_entries
+    # Activity-deployment check (Gemini round-6; defense-in-depth against entry
+    # CONCENTRATION — note an always-flat formula already fails: entries gate,
+    # uptrend participation, extreme participation (0.00 is not > 0), and the
+    # +2% aggregate edge. This catches the subtler 'all trades in one window'.)
+    active_windows = sum(1 for v in valid_metrics if v.get("entries", 0) > 0)
+    active_ratio = round(active_windows / max(len(valid_metrics), 1), 3)
+    active_ok = active_ratio >= 0.25
 
     test_rule, test_ok = None, True
     if test is not None and test.get("ok"):
@@ -298,6 +305,7 @@ def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Di
     if not mean_ok: failed.append(f"medium_term_edge({mean_hurdle}%)")
     if not t_ok: failed.append("consistency(t>0)")
     if not entries_ok: failed.append(f"min_total_entries({min_total_entries}, got {total_entries})")
+    if not active_ok: failed.append(f"active_deployment({active_ratio:.0%} of windows traded, need 25%)")
     if not test_ok: failed.append(f"test_charter({test_rule['bucket'] if test_rule else '?'})")
     if noise_result is not None and not noise_result.get("passed", False):
         failed.append("noise_stability")
@@ -312,6 +320,8 @@ def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Di
             "extreme_participation_passed": extreme_ok,
             "medium_term_edge_passed": mean_ok, "consistency_passed": t_ok,
             "entries_gate_passed": entries_ok,
+            "active_deployment_ratio": active_ratio,
+            "active_deployment_passed": active_ok,
             "test_rule": test_rule, "test_charter_passed": test_ok,
             "edge": edge, "failed_gates": failed, "verdict": verdict,
             "charter": "JP 2026-09-30: medium-term significant outperformance via "
