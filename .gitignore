@@ -17,3 +17,6 @@ forward_state*.json
 # compiled bytecode — never in git (purged from history 2026-09-28)
 *.pyc
 __pycache__/
+
+# cached market data (refetchable from OKX)
+framework/data_cache/
