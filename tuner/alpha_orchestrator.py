@@ -223,7 +223,8 @@ def cross_asset_report(best_params_dict, args, windows, data_start, data_end):
 
 def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Dict],
                    mean_hurdle: float = 2.0, min_total_entries: int = 50,
-                   participation_floor: float = 0.3, extreme_bench: float = 15.0,
+                   participation_floor: float = 0.6, extreme_bench: float = 15.0,
+                   downside_absorption: float = 0.2,
                    noise_result: Optional[Dict] = None) -> Dict:
     """JP charter gates (2026-09-30): beat B&H significantly on the MEDIUM TERM
     by (a) never losing when the market loses, (b) participating in uptrends.
@@ -247,9 +248,16 @@ def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Di
         t_score = None
 
     def bucket_rule(bench: float, strat: float) -> Dict:
+        # ASYMMETRIC CHARTER (JP + Gemini 2026-10-01, compounding-corrected):
+        # downside absorption <=20% of the drop, upside capture >=60%.
+        # The strict strat>=0 floor was mis-rejecting at fee granularity
+        # (alpha_005: -0.05% in a -1.7% window = technicality rejection) and
+        # pushing the optimizer into the over-hedged/flat corner.
         if bench <= 0:
-            return {"bucket": "down_shield", "required": "strat >= 0",
-                    "pass": strat >= 0}
+            allowed = bench * downside_absorption
+            return {"bucket": "down_shield",
+                    "required": f"strat >= {downside_absorption:.0%} x bench ({allowed:.2f})",
+                    "pass": strat >= allowed}
         if bench >= extreme_bench:
             return {"bucket": "extreme_participation", "required": "strat > 0",
                     "pass": strat > 0}
@@ -326,10 +334,10 @@ def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Di
             "active_deployment_passed": active_ok,
             "test_rule": test_rule, "test_charter_passed": test_ok,
             "edge": edge, "failed_gates": failed, "verdict": verdict,
-            "charter": "JP 2026-09-30: medium-term significant outperformance via "
-                       "down-shield (bench<=0 -> strat>=0), uptrend participation "
-                       f"(>= {participation_floor:.0%} of bench), extreme melt-ups "
-                       f"(bench >= +{extreme_bench}% -> strat>0), mean excess > "
+            "charter": "JP 2026-10-01 (asymmetric, compounding-corrected): "
+                       f"downside absorption <= {downside_absorption:.0%} of bench drop, "
+                       f"uptrend capture >= {participation_floor:.0%} of bench, extreme "
+                       f"melt-ups (bench >= +{extreme_bench}% -> strat>0), mean excess > "
                        f"{mean_hurdle}% with t>0"}
 
 
@@ -349,7 +357,9 @@ def main() -> int:
     ap.add_argument("--valid-days", type=int, default=7)
     ap.add_argument("--slide-days", type=int, default=7)
     ap.add_argument("--test-days", type=int, default=10)
-    ap.add_argument("--participation-floor", type=float, default=0.3)
+    ap.add_argument("--participation-floor", type=float, default=0.6)
+    ap.add_argument("--downside-absorption", type=float, default=0.2,
+                    help="max fraction of the bench drop the strategy may absorb (0.2 = cut losses 80%%)")
     ap.add_argument("--extreme-bench", type=float, default=15.0)
     ap.add_argument("--mean-hurdle", type=float, default=2.0)
     ap.add_argument("--min-total-entries", type=int, default=50)
@@ -477,6 +487,7 @@ def main() -> int:
                            min_total_entries=args.min_total_entries,
                            participation_floor=args.participation_floor,
                            extreme_bench=args.extreme_bench,
+                           downside_absorption=args.downside_absorption,
                            noise_result=noise_result)
     report = {
         "label": label, "formula": args.formula,

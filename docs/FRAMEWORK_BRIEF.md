@@ -154,11 +154,14 @@ not every window. The edge equation: medium-term excess = (what you keep from
 uptrends) − (what you lose in drawdowns). Win by losing less when the market
 falls, while riding enough of every rise.
 
-Hard rules per OOS window (benchmark bucket decides the rule):
-1. DOWN-SHIELD: bench ≤ 0 → strategy ≥ 0. Bleeding while the market bleeds
-   disqualifies you, whatever your rallies look like.
-2. UPTREND PARTICIPATION: 0 < bench < +15% → capture ≥ 30% of the move.
-   Sitting out ordinary rallies is failure.
+Hard rules per OOS window (ASYMMETRIC, compounding-corrected 2026-10-01 —
+a strategy absorbing 50% of drops while capturing 30% of rallies compounds
+AGAINST you: −10% then +9% = −1.9% while B&H makes +4%):
+1. DOWN-SHIELD: bench ≤ 0 → absorb at most 20% of the drop
+   (strategy ≥ 0.2 × bench). Cut the market's losses by 80%+.
+2. UPTREND PARTICIPATION: 0 < bench < +15% → capture ≥ 60% of the move.
+   The asymmetry (−20% downside / +60% upside) is what makes compounding
+   work for you: −4% then +18% = +13.3% while B&H makes +4%.
 3. EXTREME MELT-UPS: bench ≥ +15% → participation only (strategy > 0).
    Vertical weeks reward holders, not traders. Don't chase, don't fear.
 4. MEDIUM-TERM EDGE (aggregate): OOS mean excess ≥ +2%, consistency t > 0,
