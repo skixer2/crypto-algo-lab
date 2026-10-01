@@ -412,8 +412,13 @@ def main() -> int:
             long_threshold=trial.suggest_float("long_threshold", 0.30, 0.90),
             short_threshold=trial.suggest_float("short_threshold", 0.30, 0.90),
             signal_smoothing=trial.suggest_int("signal_smoothing", 3, 21),
-            atr_stop_mult=trial.suggest_float("atr_stop_mult", 1.0, 4.0),
-            atr_take_mult=trial.suggest_float("atr_take_mult", 1.0, 5.0),
+            # Stop/take ranges extended to 8.0 (flagship verdict 2026-10-01:
+            # the 1-4/1-5 caps structurally prevented riding mild-up chop —
+            # tight stops whipsawed longs flat. Charter gates judge the
+            # tradeoff; wider stops risk worse down-shield, so the optimizer
+            # must earn them per-window.)
+            atr_stop_mult=trial.suggest_float("atr_stop_mult", 1.0, 8.0),
+            atr_take_mult=trial.suggest_float("atr_take_mult", 1.0, 8.0),
             use_bias_filter=trial.suggest_categorical("use_bias_filter", [True, False]),
             signal_exit_threshold=trial.suggest_categorical(
                 "signal_exit_threshold", [None, 0.3, 0.4, 0.5]),
