@@ -409,8 +409,12 @@ def main() -> int:
     def make_params(trial) -> WQAlphaParams:
         return WQAlphaParams(
             formula_path=args.formula,
-            long_threshold=trial.suggest_float("long_threshold", 0.30, 0.90),
-            short_threshold=trial.suggest_float("short_threshold", 0.30, 0.90),
+            # Threshold floor 0.30 -> 0.15 (2026-10-01): entries chronically
+            # 6-31 vs the >=50 gate — the space could not physically reach the
+            # activity requirement. Same governance class as the stop-range
+            # widening: gates still judge outcomes.
+            long_threshold=trial.suggest_float("long_threshold", 0.15, 0.90),
+            short_threshold=trial.suggest_float("short_threshold", 0.15, 0.90),
             signal_smoothing=trial.suggest_int("signal_smoothing", 3, 21),
             # Stop/take ranges extended to 8.0 (flagship verdict 2026-10-01:
             # the 1-4/1-5 caps structurally prevented riding mild-up chop —
