@@ -165,8 +165,17 @@ AGAINST you: −10% then +9% = −1.9% while B&H makes +4%):
 3. EXTREME MELT-UPS: bench ≥ +15% → participation only (strategy > 0).
    Vertical weeks reward holders, not traders. Don't chase, don't fear.
 4. MEDIUM-TERM EDGE (aggregate): OOS mean excess ≥ +2%, consistency t > 0,
-   ≥ 50 OOS entries, parameter-noise stability gate, test window obeys its
-   bucket rule, and edge over the incumbent champion when one exists.
+   ADAPTIVE ACTIVITY GATE (JP 2026-10-02, delegated): total entries ≥ 8 AND
+   mean ≥ 2 entries per active window AND ≥ 25% of windows active — replaces
+   the fixed 50-bar, which assumed scalping-like activity; a regime-gated
+   system legitimately trades selectively. Parameter-noise stability gate,
+   test window obeys its bucket rule, and edge over the incumbent champion
+   when one exists.
+
+OWNER'S MISSION STATEMENT (JP, 2026-10-02): the only things that matter are
+highest return over ~one year, not losing money, and beating the market.
+Entry bars and gate knobs are instruments, not goals — tune them if they
+obstruct the mission without adding protection.
 
 Design implication for formulas: ASYMMETRY beats symmetry — fast trend
 entries with tight risk. Flat-in-drops + partial-long-in-rallies passes;
