@@ -222,7 +222,7 @@ def cross_asset_report(best_params_dict, args, windows, data_start, data_end):
 
 
 def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Dict],
-                   mean_hurdle: float = 2.0, min_total_entries: int = 50,
+                   mean_hurdle: float = 2.0, min_total_entries: int = 8,
                    participation_floor: float = 0.6, extreme_bench: float = 15.0,
                    downside_absorption: float = 0.2,
                    noise_result: Optional[Dict] = None) -> Dict:
@@ -287,7 +287,17 @@ def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Di
 
     mean_ok = oos_mean_excess > mean_hurdle
     t_ok = (t_score is not None and t_score > 0)
-    entries_ok = total_entries >= min_total_entries
+    # ADAPTIVE ACTIVITY GATE (JP 2026-10-02 delegation; Gemini round-11 design,
+    # hardened by ZioClaw): the fixed 50-bar assumed scalping-like activity — a
+    # regime-gated system legitimately trades selectively. Anti-gaming now rests
+    # on three legs: (a) absolute total floor (default 8), (b) per-active-window
+    # mean >= 2 entries (statistical sample when engaged), (c) >=25% of windows
+    # active. Gemini's unhardened version (mean >= 2 alone) would pass a
+    # 2-trade strategy on 4 windows — the total floor closes that.
+    active_metrics = [v for v in valid_metrics if v.get("entries", 0) > 0]
+    mean_when_active = (sum(v["entries"] for v in active_metrics) / len(active_metrics)
+                        if active_metrics else 0.0)
+    entries_ok = (total_entries >= min_total_entries) and (mean_when_active >= 2)
     # Activity-deployment check (Gemini round-6; defense-in-depth against entry
     # CONCENTRATION — note an always-flat formula already fails: entries gate,
     # uptrend participation, extreme participation (0.00 is not > 0), and the
@@ -314,7 +324,9 @@ def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Di
     if not extreme_ok: failed.append(f"extreme_participation(bench>={extreme_bench}%)")
     if not mean_ok: failed.append(f"medium_term_edge({mean_hurdle}%)")
     if not t_ok: failed.append("consistency(t>0)")
-    if not entries_ok: failed.append(f"min_total_entries({min_total_entries}, got {total_entries})")
+    if not entries_ok:
+        failed.append(f"adaptive_activity(total>={min_total_entries} AND mean_active>=2, "
+                      f"got {total_entries}/{mean_when_active:.1f})")
     if not active_ok: failed.append(f"active_deployment({active_ratio:.0%} of windows traded, need 25%)")
     if not test_ok: failed.append(f"test_charter({test_rule['bucket'] if test_rule else '?'})")
     if noise_result is not None and not noise_result.get("passed", False):
@@ -330,6 +342,7 @@ def evaluate_gates(windows: List[Dict], test: Optional[Dict], champ: Optional[Di
             "extreme_participation_passed": extreme_ok,
             "medium_term_edge_passed": mean_ok, "consistency_passed": t_ok,
             "entries_gate_passed": entries_ok,
+            "mean_entries_when_active": round(mean_when_active, 2),
             "active_deployment_ratio": active_ratio,
             "active_deployment_passed": active_ok,
             "test_rule": test_rule, "test_charter_passed": test_ok,
@@ -362,7 +375,9 @@ def main() -> int:
                     help="max fraction of the bench drop the strategy may absorb (0.2 = cut losses 80%%)")
     ap.add_argument("--extreme-bench", type=float, default=15.0)
     ap.add_argument("--mean-hurdle", type=float, default=2.0)
-    ap.add_argument("--min-total-entries", type=int, default=50)
+    ap.add_argument("--min-total-entries", type=int, default=8,
+                    help="absolute entries floor for the adaptive activity gate "
+                         "(plus: mean >= 2 per active window, >= 25% windows active)")
     ap.add_argument("--label", default=None)
     ap.add_argument("--no-shorts", action="store_true",
                     help="long-only study (Phase 2 / Revolut variant)")
