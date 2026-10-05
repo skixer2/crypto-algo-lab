@@ -52,6 +52,7 @@ class RouterParams:
     vol_compression: float = 0.75         # TR ratio below this = compressed
     vol_fast: int = 14
     vol_slow: int = 96
+    grind_slope_bars: int = 96        # 4th state: slow grind-down detector (24h @ 15m)
     # per-specialist entry thresholds
     meltup_threshold: float = 0.35
     chop_threshold: float = 0.35
@@ -132,18 +133,26 @@ class CompositeRouterModel:
         mid = float(self._mid.iat[i])
         volr = float(self._volratio.iat[i])
         bearish = bool(self._below_sustained.iat[i]) and price < mid
+        slope = float(self._slope.iat[i])
+        atr = float(self._atr.iat[i])
+        if not (atr > 0):
+            atr = price * 0.01
 
         if bearish:
             role, threshold, regime = "down", self.p.down_threshold, "confirmed_bearish"
+        elif price < mid and slope < 0:
+            # 4th state (v2): slow grind-down — below mid, not confirmed bearish,
+            # negative slow slope. w08 lesson (2025-01, -42.8%): melt-up default lane
+            # must NOT try longs into a grind. Stand aside entirely.
+            self._last_indicators = {"entry_price": price, "regime": "grind_down",
+                                     "routed": "cash", "signal": 0.0, "atr": round(atr, 4)}
+            return "flat", 0.0, self._last_indicators
         elif volr < self.p.vol_compression:
             role, threshold, regime = "chop", self.p.chop_threshold, "vol_compressed"
         else:
             role, threshold, regime = "meltup", self.p.meltup_threshold, "expansion"
 
         sig = float(self._sig[role].iat[i])
-        atr = float(self._atr.iat[i])
-        if not (atr > 0):
-            atr = price * 0.01
 
         action: Action = "flat"
         if sig >= threshold:
@@ -199,6 +208,8 @@ class CompositeRouterModel:
         below = (c < self._mid).astype(float)
         self._below_sustained = below.rolling(self.p.confirm_bars,
                                               min_periods=self.p.confirm_bars).mean() >= 0.9
+        gb = max(int(self.p.grind_slope_bars), 8)
+        self._slope = c - c.rolling(gb, min_periods=gb // 2).mean()
 
     # context CSV injection (orchestrator wires this; keeps model file-clean)
     ctx_csv: Optional[str] = None

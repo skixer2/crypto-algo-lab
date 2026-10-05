@@ -92,6 +92,7 @@ def main():
             p = RouterParams(
                 donchian_bars=trial.suggest_int("donchian_bars", 96, 288, step=24),
                 confirm_bars=trial.suggest_int("confirm_bars", 24, 96, step=24),
+                grind_slope_bars=trial.suggest_int("grind_slope_bars", 48, 288, step=24),
                 vol_compression=trial.suggest_float("vol_compression", 0.60, 0.95),
                 meltup_threshold=trial.suggest_float("meltup_threshold", 0.20, 0.60),
                 chop_threshold=trial.suggest_float("chop_threshold", 0.20, 0.60),
@@ -110,7 +111,7 @@ def main():
         bp = study.best_params
 
         p = RouterParams(
-            donchian_bars=bp["donchian_bars"], confirm_bars=bp["confirm_bars"],
+            donchian_bars=bp["donchian_bars"], confirm_bars=bp["confirm_bars"], grind_slope_bars=bp["grind_slope_bars"],
             vol_compression=bp["vol_compression"],
             meltup_threshold=bp["meltup_threshold"], chop_threshold=bp["chop_threshold"],
             down_threshold=bp["down_threshold"],
