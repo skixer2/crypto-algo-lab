@@ -437,10 +437,10 @@ def main() -> int:
             # tradeoff; wider stops risk worse down-shield, so the optimizer
             # must earn them per-window.)
             atr_stop_mult=trial.suggest_float("atr_stop_mult", 1.0, 8.0),
-            atr_take_mult=trial.suggest_float("atr_take_mult", 1.0, 8.0),
+            atr_take_mult=trial.suggest_float("atr_take_mult", 1.0, 15.0),
             use_bias_filter=trial.suggest_categorical("use_bias_filter", [True, False]),
             signal_exit_threshold=trial.suggest_categorical(
-                "signal_exit_threshold", [None, 0.3, 0.4, 0.5]),
+                "signal_exit_threshold", [None, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]),
         )
 
     results: List[Dict] = []
