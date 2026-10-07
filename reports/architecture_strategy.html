@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SGC Alpha Program — Strategy Architecture (2026-10-07)</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", sans-serif; background: #fff; margin: 24px; }
+  h1 { font-size: 18px; color: #222; }
+  p.sub { font-size: 13px; color: #555; max-width: 1100px; }
+  .box text { font-size: 13px; fill: #222; }
+  .box .t { font-size: 14px; font-weight: 600; }
+  .small { font-size: 11px; fill: #555; }
+  .badge { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+</style>
+</head>
+<body>
+<h1>Strategy architecture — two experts + router (regime-conditional doctrine)</h1>
+<p class="sub">Status: <b>NOT yet live</b>. The deployed system remains the legacy OKX/Revolut RSI bots (untouched).
+This pipeline is in research; promotion to paper, then live, requires: charter gates v3 pass → blend optimizer →
+holdout seal opened ONCE (final 2 months, never optimized) → paper trade. Data flows left to right.</p>
+
+<svg viewBox="0 0 1480 720" width="1480" height="720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- connectors (drawn first, behind nodes) -->
+  <g stroke="#666" stroke-width="2" fill="none">
+    <path d="M 300 360 H 360" marker-end="url(#arr)"/>
+    <path d="M 560 360 H 620" marker-end="url(#arr)"/>
+    <path d="M 880 360 H 940" marker-end="url(#arr)"/>
+    <path d="M 1150 360 H 1210" marker-end="url(#arr)"/>
+    <path d="M 1330 360 H 1390" marker-end="url(#arr)"/>
+    <!-- specialist lanes up/down from router -->
+    <path d="M 750 320 V 150 H 620" marker-end="url(#arr)"/>
+    <path d="M 750 320 V 240 H 620" marker-end="url(#arr)"/>
+    <path d="M 750 400 V 500 H 620" marker-end="url(#arr)"/>
+    <path d="M 750 400 V 590 H 620" marker-end="url(#arr)"/>
+    <!-- loop feeds pool -->
+    <path d="M 620 590 H 560 V 660 H 380" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+    <!-- gates feedback to blender & deployment -->
+  </g>
+
+  <!-- DATA -->
+  <g class="box">
+    <rect x="60" y="240" width="240" height="240" rx="10" fill="#E8EEF4" stroke="#4a78b0" stroke-width="2"/>
+    <text class="t" x="84" y="272" fill="#28527a">DATA SOURCES</text>
+    <text x="84" y="300">• 4.5y OHLCV archive 2021→26</text>
+    <text x="84" y="324">• Depth recorder (accruing)</text>
+    <text x="84" y="348">• Funding / OI cache — TODAY</text>
+    <text x="84" y="372">• L1 macro digest — TODAY</text>
+    <text x="84" y="396">• Holdout: Jul 28→Sep 26 LOCKED</text>
+    <text class="badge" x="84" y="440" fill="#28527a">STORAGE · SEALED</text>
+  </g>
+
+  <!-- TAGGER -->
+  <g class="box">
+    <rect x="360" y="290" width="200" height="140" rx="10" fill="#F0EDE6" stroke="#8a7a52" stroke-width="2"/>
+    <text class="t" x="384" y="322" fill="#6a5c34">REGIME TAGGER</text>
+    <text x="384" y="350">causal, trailing only:</text>
+    <text x="384" y="374">bear / bull / neutral</text>
+    <text x="384" y="398">episodes + live state</text>
+  </g>
+
+  <!-- SPECIALISTS (left of router, lanes) -->
+  <g class="box">
+    <rect x="60" y="100" width="560" height="70" rx="10" fill="#E6F2E6" stroke="#2ca02c" stroke-width="2"/>
+    <text class="t" x="84" y="128" fill="#1d6b2a">DOWN-SHIELD EXPERT — alpha_028 / 027</text>
+    <text x="84" y="150">bear mean +5.3% / +4.7% OOS · 7/8 windows flat-or-positive · shield by abstention</text>
+    <text class="badge" x="516" y="128" fill="#1d6b2a">PROVEN</text>
+  </g>
+  <g class="box">
+    <rect x="60" y="195" width="560" height="70" rx="10" fill="#E6F2E6" stroke="#2ca02c" stroke-width="2" stroke-dasharray="7 4"/>
+    <text class="t" x="84" y="223" fill="#1d6b2a">BULL LATCH — alpha_031 (designing)</text>
+    <text x="84" y="245">persistence-hold on breakout ignition · attacks the participation hole (flat in +25% months)</text>
+    <text class="badge" x="530" y="223" fill="#b04040">VACANT SEAT</text>
+  </g>
+  <g class="box">
+    <rect x="60" y="470" width="560" height="70" rx="10" fill="#E6F2E6" stroke="#2ca02c" stroke-width="2"/>
+    <text class="t" x="84" y="498" fill="#1d6b2a">CHOP — alpha_008</text>
+    <text x="84" y="520">vol-compressed ranges · routine capture, low drama</text>
+    <text class="badge" x="530" y="498" fill="#1d6b2a">PROVEN</text>
+  </g>
+  <g class="box">
+    <rect x="60" y="565" width="560" height="70" rx="10" fill="#E6F2E6" stroke="#2ca02c" stroke-width="2"/>
+    <text class="t" x="84" y="593" fill="#1d6b2a">MELT-UP — alpha_004 (stale) + 024 lineage</text>
+    <text x="84" y="615">fast V-reversal trigger · +7.9 best of new gen · deepening</text>
+    <text class="badge" x="510" y="593" fill="#c98a1c">REBUILDING</text>
+  </g>
+
+  <!-- ROUTER -->
+  <g class="box">
+    <rect x="620" y="250" width="260" height="220" rx="10" fill="#FBEFD9" stroke="#c98a1c" stroke-width="2"/>
+    <text class="t" x="644" y="282" fill="#8a6212">COMPOSITE ROUTER v2</text>
+    <text x="644" y="310">confirmed_bearish → down lane</text>
+    <text x="644" y="334">grind_down → cash (stand aside)</text>
+    <text x="644" y="358">vol_compressed → chop lane</text>
+    <text x="644" y="382">expansion → melt-up lane</text>
+    <text x="644" y="410">SWITCH, never blend</text>
+    <text class="small" x="644" y="434">5.5y study: down months profitable</text>
+    <text class="badge" x="644" y="452" fill="#8a6212">BUILT · v2.1 THIS WEEK</text>
+  </g>
+
+  <!-- GATES -->
+  <g class="box">
+    <rect x="940" y="250" width="210" height="220" rx="10" fill="#F4E8F0" stroke="#8a4a72" stroke-width="2"/>
+    <text class="t" x="964" y="282" fill="#6b2a4d">JUDGES</text>
+    <text x="964" y="310">Charter gates v3</text>
+    <text x="964" y="334">(monthly windows)</text>
+    <text x="964" y="362">Holdout seal</text>
+    <text x="964" y="386">opened ONCE</text>
+    <text class="badge" x="964" y="452" fill="#6b2a4d">TODAY</text>
+  </g>
+
+  <!-- BLENDER -->
+  <g class="box">
+    <rect x="1150" y="270" width="160" height="180" rx="10" fill="#FBEFD9" stroke="#c98a1c" stroke-width="2"/>
+    <text class="t" x="1174" y="302" fill="#8a6212">BLEND</text>
+    <text class="t" x="1174" y="322" fill="#8a6212">OPTIMIZER</text>
+    <text x="1174" y="350">GA / NSGA-II</text>
+    <text x="1174" y="374">return-only</text>
+    <text x="1174" y="398">reward · MDD</text>
+    <text x="1174" y="422">pure cost</text>
+    <text class="badge" x="1174" y="432" fill="#8a6212">SATURDAY</text>
+  </g>
+
+  <!-- DEPLOYMENT -->
+  <g class="box">
+    <rect x="1390" y="290" width="80" height="140" rx="10" fill="#F9E4E4" stroke="#b04040" stroke-width="2"/>
+    <text class="t" x="1404" y="322" fill="#7a2626">GO</text>
+    <text class="t" x="1404" y="342" fill="#7a2626">LIVE</text>
+    <text x="1404" y="370">paper</text>
+    <text x="130" y="60" class="small">generation loop grows the specialist pool (4 attempts/day, 5-year archive) — feeds all lanes</text>
+    <text x="1404" y="392">then</text>
+    <text x="1404" y="414">live</text>
+    <text class="badge" x="1398" y="418" fill="#b04040">LOCKED</text>
+  </g>
+</svg>
+</body>
+</html>
