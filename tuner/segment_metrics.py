@@ -91,3 +91,22 @@ if __name__ == "__main__":
     import sys
     demo_alpha(sys.argv[1] if len(sys.argv) > 1 else "alpha_032_auto",
                sys.argv[2] if len(sys.argv) > 2 else "alpha_032")
+
+
+def time_out_pct(eq: pd.DataFrame, win_start, win_end) -> float:
+    """Fraction of window bars spent FLAT (JP out-penalty, 2026-10-07).
+    Heuristic: in-position bars carry MTM movement; flat bars do not."""
+    import numpy as np
+    m = eq[(eq["timestamp"] >= pd.Timestamp(win_start)) & (eq["timestamp"] < pd.Timestamp(win_end))]
+    if len(m) < 2:
+        return float("nan")
+    moved = m["equity"].diff().abs() > 1e-9
+    return float((~moved).mean() * 100)
+
+
+def out_penalty_pct(time_out: float) -> float:
+    """Excess points of penalty: free below 20% out, then superlinear.
+    30% out -> 1.0 pt, 40% -> 2.8, 60% -> 6.5 (JP-approved curve)."""
+    if time_out != time_out or time_out <= 20.0:
+        return 0.0
+    return ((time_out - 20.0) / 10.0) ** 1.5
