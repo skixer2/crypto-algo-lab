@@ -29,7 +29,7 @@ sweep starts and recorded in the run config.
 - `time_out_pct` measured from equity curves (in-position bars = MTM
   movement; flat bars = no movement).
 - `penalty_out = ((time_out_pct − 20) / 10)^1.5` excess points, zero below
-  20%: 30% out → 1.0 pt · 40% → 2.8 · 60% → 6.5.
+  20%: 30% out → 1.0 pt · 40% → 2.8 · 60% → 8.0.
 - Doctrine: default posture is LONG (crypto drift). Short requires
   confirmation; OUT requires confirmation. The router's states already
   comply (grind_down cash is 48-bar-confirmed; expansion defaults long).
