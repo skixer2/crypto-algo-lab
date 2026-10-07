@@ -53,6 +53,7 @@ class RouterParams:
     vol_fast: int = 14
     vol_slow: int = 96
     grind_slope_bars: int = 96        # 4th state: slow grind-down detector (24h @ 15m)
+    grind_confirm_bars: int = 48      # v2.1: sustained negative-slope confirmation (12h @ 15m)
     # per-specialist entry thresholds
     meltup_threshold: float = 0.35
     chop_threshold: float = 0.35
@@ -140,7 +141,7 @@ class CompositeRouterModel:
 
         if bearish:
             role, threshold, regime = "down", self.p.down_threshold, "confirmed_bearish"
-        elif price < mid and slope < 0:
+        elif price < mid and slope < 0 and bool(self._slope_neg_sustained.iat[i]):
             # 4th state (v2): slow grind-down — below mid, not confirmed bearish,
             # negative slow slope. w08 lesson (2025-01, -42.8%): melt-up default lane
             # must NOT try longs into a grind. Stand aside entirely.
@@ -210,6 +211,9 @@ class CompositeRouterModel:
                                               min_periods=self.p.confirm_bars).mean() >= 0.9
         gb = max(int(self.p.grind_slope_bars), 8)
         self._slope = c - c.rolling(gb, min_periods=gb // 2).mean()
+        cb = max(int(self.p.grind_confirm_bars), 4)
+        self._slope_neg_sustained = (self._slope < 0).astype(float).rolling(
+            cb, min_periods=cb).mean() >= 0.8
 
     # context CSV injection (orchestrator wires this; keeps model file-clean)
     ctx_csv: Optional[str] = None

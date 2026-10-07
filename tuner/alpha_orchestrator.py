@@ -75,9 +75,12 @@ def slice_metrics(eq_df: pd.DataFrame, start: str, end: str, bench_df: pd.DataFr
     }
 
 
+from tuner.holdout import guard_data_end as _holdout_guard  # library-level seal
+
 def run_backtest(params: WQAlphaParams, symbol: str, exec_tf: str, bias_tf: str,
                  csv_paths: Dict[str, str], start: str, end: str,
                  ctx=None, allow_shorts: bool = True, fee: float = 0.0008) -> Optional[pd.DataFrame]:
+    _holdout_guard(end, final_run=False)  # library-level holdout seal
     if ctx is not None:
         from models.wq_alpha_fast import FastWQAlphaMinerModel
         model = FastWQAlphaMinerModel(params, ctx, execution_tf=exec_tf, bias_tfs=[bias_tf])
@@ -364,6 +367,7 @@ def main() -> int:
     ap.add_argument("--bias-tf", default="1h")
     ap.add_argument("--start", default="2026-06-15")
     ap.add_argument("--end", default="2026-09-28")
+    ap.add_argument("--final-run", action="store_true")
     ap.add_argument("--windows", type=int, default=3)
     ap.add_argument("--trials", type=int, default=40)
     ap.add_argument("--train-days", type=int, default=14)
@@ -397,7 +401,9 @@ def main() -> int:
     # 1) data
     csv_paths: Dict[str, str] = {}
     start_utc = pd.Timestamp(args.start, tz="UTC").isoformat()
-    end_utc = pd.Timestamp(args.end, tz="UTC").isoformat()
+    from tuner.holdout import guard_data_end
+    end_utc = guard_data_end(args.end, final_run=getattr(args, "final_run", False)).isoformat()
+
     for tf in (args.exec_tf, args.bias_tf):
         log.warning(f"loading {args.symbol} {tf} {args.start}..{args.end}")
         _, path, n = load_candles(symbol=args.symbol, timeframe=tf,
