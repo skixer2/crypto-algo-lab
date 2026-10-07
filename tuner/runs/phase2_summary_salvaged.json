@@ -1,0 +1,349 @@
+{
+ "protocol": "phase2-stratified-salvage",
+ "source": "/tmp/phase2.log 2026-10-07",
+ "note": "driver RUNS_DIR bug prevented native JSON save; params not persisted",
+ "formulas": {
+  "alpha_029": [
+   {
+    "regime": "bear",
+    "valid": "2021-06-10",
+    "ret_pct": 0.0,
+    "bench_pct": -7.898,
+    "excess_pct": 7.898
+   },
+   {
+    "regime": "bear",
+    "valid": "2022-01-26",
+    "ret_pct": 0.0,
+    "bench_pct": 14.36,
+    "excess_pct": -14.36
+   },
+   {
+    "regime": "bear",
+    "valid": "2022-05-20",
+    "ret_pct": 0.0,
+    "bench_pct": -10.842,
+    "excess_pct": 10.842
+   },
+   {
+    "regime": "bear",
+    "valid": "2022-07-06",
+    "ret_pct": 0.0,
+    "bench_pct": -8.094,
+    "excess_pct": 8.094
+   },
+   {
+    "regime": "bear",
+    "valid": "2024-08-24",
+    "ret_pct": 0.0,
+    "bench_pct": -8.486,
+    "excess_pct": 8.486
+   },
+   {
+    "regime": "bear",
+    "valid": "2025-02-23",
+    "ret_pct": 0.0,
+    "bench_pct": -19.707,
+    "excess_pct": 19.707
+   },
+   {
+    "regime": "bear",
+    "valid": "2025-11-24",
+    "ret_pct": -0.061,
+    "bench_pct": 4.934,
+    "excess_pct": -4.995
+   },
+   {
+    "regime": "bear",
+    "valid": "2026-06-23",
+    "ret_pct": -8.71,
+    "bench_pct": -6.575,
+    "excess_pct": -2.135
+   },
+   {
+    "regime": "bull",
+    "valid": "2021-11-09",
+    "ret_pct": -8.181,
+    "bench_pct": -6.078,
+    "excess_pct": -2.104
+   },
+   {
+    "regime": "bull",
+    "valid": "2023-11-25",
+    "ret_pct": 0.222,
+    "bench_pct": 0.222,
+    "excess_pct": 0.0
+   },
+   {
+    "regime": "bull",
+    "valid": "2024-03-10",
+    "ret_pct": -5.101,
+    "bench_pct": -9.045,
+    "excess_pct": 3.944
+   },
+   {
+    "regime": "bull",
+    "valid": "2025-08-03",
+    "ret_pct": -0.208,
+    "bench_pct": 25.473,
+    "excess_pct": -25.682
+   },
+   {
+    "regime": "neutral",
+    "valid": "2023-05-31",
+    "ret_pct": -4.317,
+    "bench_pct": -0.863,
+    "excess_pct": -3.454
+   },
+   {
+    "regime": "neutral",
+    "valid": "2024-07-03",
+    "ret_pct": 0.0,
+    "bench_pct": -10.59,
+    "excess_pct": 10.59
+   },
+   {
+    "regime": "neutral",
+    "valid": "2025-10-01",
+    "ret_pct": 0.0,
+    "bench_pct": 7.376,
+    "excess_pct": -7.376
+   },
+   {
+    "regime": "bull",
+    "valid": "2024-05-29",
+    "ret_pct": -0.953,
+    "bench_pct": -0.953,
+    "excess_pct": 0.0
+   }
+  ],
+  "alpha_027": [
+   {
+    "regime": "bear",
+    "valid": "2021-06-10",
+    "ret_pct": 0.0,
+    "bench_pct": -7.898,
+    "excess_pct": 7.898
+   },
+   {
+    "regime": "bear",
+    "valid": "2022-01-26",
+    "ret_pct": 0.0,
+    "bench_pct": 14.36,
+    "excess_pct": -14.36
+   },
+   {
+    "regime": "bear",
+    "valid": "2022-05-20",
+    "ret_pct": 0.0,
+    "bench_pct": -10.842,
+    "excess_pct": 10.842
+   },
+   {
+    "regime": "bear",
+    "valid": "2022-07-06",
+    "ret_pct": 0.0,
+    "bench_pct": -8.094,
+    "excess_pct": 8.094
+   },
+   {
+    "regime": "bear",
+    "valid": "2024-08-24",
+    "ret_pct": 0.0,
+    "bench_pct": -8.486,
+    "excess_pct": 8.486
+   },
+   {
+    "regime": "bear",
+    "valid": "2025-02-23",
+    "ret_pct": -3.832,
+    "bench_pct": -19.707,
+    "excess_pct": 15.875
+   },
+   {
+    "regime": "bear",
+    "valid": "2025-11-24",
+    "ret_pct": 0.0,
+    "bench_pct": 4.934,
+    "excess_pct": -4.934
+   },
+   {
+    "regime": "bear",
+    "valid": "2026-06-23",
+    "ret_pct": -1.212,
+    "bench_pct": -6.575,
+    "excess_pct": 5.363
+   },
+   {
+    "regime": "bull",
+    "valid": "2021-11-09",
+    "ret_pct": -6.015,
+    "bench_pct": -6.078,
+    "excess_pct": 0.063
+   },
+   {
+    "regime": "bull",
+    "valid": "2023-11-25",
+    "ret_pct": 0.0,
+    "bench_pct": 0.222,
+    "excess_pct": -0.222
+   },
+   {
+    "regime": "bull",
+    "valid": "2024-03-10",
+    "ret_pct": -6.415,
+    "bench_pct": -9.045,
+    "excess_pct": 2.63
+   },
+   {
+    "regime": "bull",
+    "valid": "2025-08-03",
+    "ret_pct": 0.0,
+    "bench_pct": 25.473,
+    "excess_pct": -25.473
+   },
+   {
+    "regime": "neutral",
+    "valid": "2023-05-31",
+    "ret_pct": -1.733,
+    "bench_pct": -0.863,
+    "excess_pct": -0.87
+   },
+   {
+    "regime": "neutral",
+    "valid": "2024-07-03",
+    "ret_pct": 0.0,
+    "bench_pct": -10.59,
+    "excess_pct": 10.59
+   },
+   {
+    "regime": "neutral",
+    "valid": "2025-10-01",
+    "ret_pct": 5.768,
+    "bench_pct": 7.376,
+    "excess_pct": -1.608
+   },
+   {
+    "regime": "bull",
+    "valid": "2024-05-29",
+    "ret_pct": -0.953,
+    "bench_pct": -0.953,
+    "excess_pct": 0.0
+   }
+  ],
+  "alpha_028": [
+   {
+    "regime": "bear",
+    "valid": "2021-06-10",
+    "ret_pct": 0.0,
+    "bench_pct": -7.898,
+    "excess_pct": 7.898
+   },
+   {
+    "regime": "bear",
+    "valid": "2022-01-26",
+    "ret_pct": 0.265,
+    "bench_pct": 14.36,
+    "excess_pct": -14.095
+   },
+   {
+    "regime": "bear",
+    "valid": "2022-05-20",
+    "ret_pct": 0.0,
+    "bench_pct": -10.842,
+    "excess_pct": 10.842
+   },
+   {
+    "regime": "bear",
+    "valid": "2022-07-06",
+    "ret_pct": 0.0,
+    "bench_pct": -8.094,
+    "excess_pct": 8.094
+   },
+   {
+    "regime": "bear",
+    "valid": "2024-08-24",
+    "ret_pct": 0.0,
+    "bench_pct": -8.486,
+    "excess_pct": 8.486
+   },
+   {
+    "regime": "bear",
+    "valid": "2025-02-23",
+    "ret_pct": 0.0,
+    "bench_pct": -19.707,
+    "excess_pct": 19.707
+   },
+   {
+    "regime": "bear",
+    "valid": "2025-11-24",
+    "ret_pct": 0.0,
+    "bench_pct": 4.934,
+    "excess_pct": -4.934
+   },
+   {
+    "regime": "bear",
+    "valid": "2026-06-23",
+    "ret_pct": 0.0,
+    "bench_pct": -6.575,
+    "excess_pct": 6.575
+   },
+   {
+    "regime": "bull",
+    "valid": "2021-11-09",
+    "ret_pct": -2.514,
+    "bench_pct": -6.078,
+    "excess_pct": 3.563
+   },
+   {
+    "regime": "bull",
+    "valid": "2023-11-25",
+    "ret_pct": 0.222,
+    "bench_pct": 0.222,
+    "excess_pct": 0.0
+   },
+   {
+    "regime": "bull",
+    "valid": "2024-03-10",
+    "ret_pct": 0.0,
+    "bench_pct": -9.045,
+    "excess_pct": 9.045
+   },
+   {
+    "regime": "bull",
+    "valid": "2025-08-03",
+    "ret_pct": 0.0,
+    "bench_pct": 25.473,
+    "excess_pct": -25.473
+   },
+   {
+    "regime": "neutral",
+    "valid": "2023-05-31",
+    "ret_pct": 0.0,
+    "bench_pct": -0.863,
+    "excess_pct": 0.863
+   },
+   {
+    "regime": "neutral",
+    "valid": "2024-07-03",
+    "ret_pct": 0.0,
+    "bench_pct": -10.59,
+    "excess_pct": 10.59
+   },
+   {
+    "regime": "neutral",
+    "valid": "2025-10-01",
+    "ret_pct": 0.0,
+    "bench_pct": 7.376,
+    "excess_pct": -7.376
+   },
+   {
+    "regime": "bull",
+    "valid": "2024-05-29",
+    "ret_pct": 0.0,
+    "bench_pct": -0.953,
+    "excess_pct": 0.953
+   }
+  ]
+ }
+}
