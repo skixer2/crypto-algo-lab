@@ -75,38 +75,46 @@ def fetch_funding(inst):
             iso = datetime.fromtimestamp(t / 1000, timezone.utc).strftime("%Y-%m-%d %H:%M:%S+00:00")
             f.write(f"{iso},{r}\n")
     os.replace(out + ".tmp", out)
-    print(f"[funding] WROTE {out} ({len(ded)} rows)", flush=True)
+    cov0 = datetime.fromtimestamp(ded[0][0]/1000, timezone.utc).date()
+    cov1 = datetime.fromtimestamp(ded[-1][0]/1000, timezone.utc).date()
+    hdr = f"# coverage: {cov0} -> {cov1} (public endpoint depth-limited; deeper needs paid sources)\n"
+    with open(out, "r") as f: body = f.read()
+    with open(out, "w") as f: f.write(hdr + body)
+    print(f"[funding] WROTE {out} ({len(ded)} rows, coverage {cov0}..{cov1})", flush=True)
+
+def fetch_rubik(name, path_tmpl, inst_ccy, cols):
+    """Generic rubik daily fetch (array-of-arrays format)."""
+    url = path_tmpl.format(base=BASE, ccy=inst_ccy)
+    page = get(url)
+    rows = sorted((int(r[0]), *[float(x) for x in r[1:]]) for r in page)
+    out = os.path.join(OUT_DIR, f"okx_{inst_ccy}_{name}_20210101_20260928.csv")
+    with open(out + ".tmp", "w") as f:
+        f.write(f"# granularity: DAILY (OKX rubik limit); coverage: {datetime.fromtimestamp(rows[0][0]/1000, timezone.utc).date()} -> {datetime.fromtimestamp(rows[-1][0]/1000, timezone.utc).date()}\n")
+        f.write("ts," + ",".join(cols) + "\n")
+        for r in rows:
+            iso = datetime.fromtimestamp(r[0] / 1000, timezone.utc).strftime("%Y-%m-%d %H:%M:%S+00:00")
+            f.write(iso + "," + ",".join(str(x) for x in r[1:]) + "\n")
+    os.replace(out + ".tmp", out)
+    print(f"[{name}] WROTE {out} ({len(rows)} rows, {rows[0][0]}..{rows[-1][0]})", flush=True)
 
 def fetch_oi(inst_ccy):
-    # rubik daily OI history (long history = daily granularity only — disclosed)
-    rows, after = [], None
-    while True:
-        url = f"{BASE}/rubik/stat/contracts/open-interest-history?ccy={inst_ccy}&period=1D"
-        page = get(url)
-        if not page:
-            break
-        for day in page:
-            rows.extend((int(t), oi, oival) for t, oi, oival in
-                        zip(day.get("ts", []), day.get("oi", []), day.get("oiCcy", []) or day.get("oiUsd", [])))
-        oldest = min(int(t) for t in day.get("ts", [])) if page and page[0].get("ts") else 0
-        if not page[0].get("more") or oldest <= START_MS:
-            break
-        time.sleep(0.3)
-    rows = [(t, float(a), float(b)) for t, a, b in rows if t >= START_MS]
-    rows.sort()
-    out = os.path.join(OUT_DIR, f"okx_{inst_ccy}_oi_daily_20210101_20260928.csv")
-    with open(out + ".tmp", "w") as f:
-        f.write("# granularity: DAILY (OKX rubik long-history limit); 24h velocity = primary feature\n")
-        f.write("ts,oi_contracts,oi_value\n")
-        for t, a, b in rows:
-            iso = datetime.fromtimestamp(t / 1000, timezone.utc).strftime("%Y-%m-%d %H:%M:%S+00:00")
-            f.write(f"{iso},{a},{b}\n")
-    os.replace(out + ".tmp", out)
-    print(f"[oi] WROTE {out} ({len(rows)} rows, daily granularity)", flush=True)
+    fetch_rubik("oi_daily", "{base}/rubik/stat/contracts/open-interest-volume?ccy={ccy}&period=1D",
+                inst_ccy, ["oi_contracts", "oi_value"])
+
+def fetch_taker(inst_ccy):
+    fetch_rubik("taker_daily", "{base}/rubik/stat/taker-volume?ccy={ccy}&instType=CONTRACTS&period=1D",
+                inst_ccy, ["taker_buy_vol", "taker_sell_vol"])
 
 if __name__ == "__main__":
-    fetch_funding("ETH-USDT-SWAP")
-    fetch_oi("ETH")
-    fetch_funding("BTC-USDT-SWAP")
-    fetch_oi("BTC")
+    import sys as _s
+    only = _s.argv[1] if len(_s.argv) > 1 else "all"
+    if only in ("all", "oi"):
+        for ccy in ("ETH", "BTC"):
+            fetch_oi(ccy); fetch_taker(ccy)
+    if only in ("all", "funding"):
+        for inst in ("ETH-USDT-SWAP", "BTC-USDT-SWAP"):
+            try:
+                fetch_funding(inst)
+            except Exception as e:
+                print(f"[funding] {inst} FAILED: {e}", flush=True)
     print("ALL DONE", flush=True)

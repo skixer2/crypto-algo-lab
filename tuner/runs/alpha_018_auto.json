@@ -1,0 +1,283 @@
+{
+ "label": "alpha_018_auto",
+ "formula": "alpha_018",
+ "formula_hash": "c2d820c41189",
+ "symbol": "ETH/USDT",
+ "exec_tf": "15m",
+ "bias_tf": "1h",
+ "data": {
+  "start": "2026-01-01 00:00:00+00:00",
+  "end": "2026-09-28 00:00:00+00:00",
+  "candles": 25921
+ },
+ "windows": [
+  {
+   "train_span": [
+    "2026-07-10T23:59:00+00:00",
+    "2026-08-09T23:59:00+00:00"
+   ],
+   "valid_span": [
+    "2026-08-09T23:59:00+00:00",
+    "2026-08-16T23:59:00+00:00"
+   ],
+   "best_params": {
+    "long_threshold": 0.25569316873107195,
+    "short_threshold": 0.7516477355655298,
+    "signal_smoothing": 4,
+    "atr_stop_mult": 7.908208556203621,
+    "atr_take_mult": 6.405713385076602,
+    "use_bias_filter": true,
+    "signal_exit_threshold": null
+   },
+   "train": {
+    "ok": true,
+    "return_pct": 5.77,
+    "bench_pct": 6.529,
+    "excess_pct": -0.759,
+    "mdd_pct": 8.29,
+    "entries": 11,
+    "sharpe": 2.14,
+    "score": -1.859
+   },
+   "valid": {
+    "ok": true,
+    "return_pct": -2.378,
+    "bench_pct": -2.378,
+    "excess_pct": 0.0,
+    "mdd_pct": 3.62,
+    "entries": 1,
+    "sharpe": -4.68,
+    "score": -0.1
+   },
+   "sec": 7.2
+  },
+  {
+   "train_span": [
+    "2026-07-17T23:59:00+00:00",
+    "2026-08-16T23:59:00+00:00"
+   ],
+   "valid_span": [
+    "2026-08-16T23:59:00+00:00",
+    "2026-08-23T23:59:00+00:00"
+   ],
+   "best_params": {
+    "long_threshold": 0.7515353389714999,
+    "short_threshold": 0.3408158443949095,
+    "signal_smoothing": 4,
+    "atr_stop_mult": 7.066540486294402,
+    "atr_take_mult": 2.547202971190599,
+    "use_bias_filter": true,
+    "signal_exit_threshold": 0.5
+   },
+   "train": {
+    "ok": true,
+    "return_pct": 0.0,
+    "bench_pct": 1.787,
+    "excess_pct": -1.787,
+    "mdd_pct": 0.0,
+    "entries": 0,
+    "sharpe": 0.0,
+    "score": -1.787
+   },
+   "valid": {
+    "ok": true,
+    "return_pct": 0.0,
+    "bench_pct": 31.326,
+    "excess_pct": -31.326,
+    "mdd_pct": 0.0,
+    "entries": 0,
+    "sharpe": 0.0,
+    "score": -31.326
+   },
+   "sec": 7.5
+  },
+  {
+   "train_span": [
+    "2026-07-24T23:59:00+00:00",
+    "2026-08-23T23:59:00+00:00"
+   ],
+   "valid_span": [
+    "2026-08-23T23:59:00+00:00",
+    "2026-08-30T23:59:00+00:00"
+   ],
+   "best_params": {
+    "long_threshold": 0.1540121513596938,
+    "short_threshold": 0.4722700377101584,
+    "signal_smoothing": 3,
+    "atr_stop_mult": 4.580121532900186,
+    "atr_take_mult": 5.333515441816804,
+    "use_bias_filter": true,
+    "signal_exit_threshold": 0.5
+   },
+   "train": {
+    "ok": true,
+    "return_pct": 22.347,
+    "bench_pct": 32.231,
+    "excess_pct": -9.884,
+    "mdd_pct": 6.55,
+    "entries": 15,
+    "sharpe": 6.8,
+    "score": -11.384
+   },
+   "valid": {
+    "ok": true,
+    "return_pct": -1.15,
+    "bench_pct": -1.705,
+    "excess_pct": 0.555,
+    "mdd_pct": 5.97,
+    "entries": 7,
+    "sharpe": -1.01,
+    "score": -0.145
+   },
+   "sec": 7.6
+  },
+  {
+   "train_span": [
+    "2026-07-31T23:59:00+00:00",
+    "2026-08-30T23:59:00+00:00"
+   ],
+   "valid_span": [
+    "2026-08-30T23:59:00+00:00",
+    "2026-09-06T23:59:00+00:00"
+   ],
+   "best_params": {
+    "long_threshold": 0.15642854864125533,
+    "short_threshold": 0.5526587883944274,
+    "signal_smoothing": 12,
+    "atr_stop_mult": 2.400270189525454,
+    "atr_take_mult": 6.457208414302081,
+    "use_bias_filter": true,
+    "signal_exit_threshold": 0.5
+   },
+   "train": {
+    "ok": true,
+    "return_pct": 15.237,
+    "bench_pct": 29.583,
+    "excess_pct": -14.346,
+    "mdd_pct": 7.76,
+    "entries": 16,
+    "sharpe": 5.25,
+    "score": -15.946
+   },
+   "valid": {
+    "ok": true,
+    "return_pct": -0.05,
+    "bench_pct": 3.889,
+    "excess_pct": -3.939,
+    "mdd_pct": 1.43,
+    "entries": 2,
+    "sharpe": -0.18,
+    "score": -4.139
+   },
+   "sec": 8.6
+  }
+ ],
+ "test": {
+  "ok": true,
+  "return_pct": -2.685,
+  "bench_pct": 6.797,
+  "excess_pct": -9.482,
+  "mdd_pct": 9.88,
+  "entries": 7,
+  "sharpe": -1.03,
+  "score": -10.182
+ },
+ "gates": {
+  "oos_mean_excess_pct": -8.678,
+  "oos_total_entries": 10,
+  "consistency_t_score": -0.66,
+  "window_rules": [
+   {
+    "bucket": "down_shield",
+    "required": "strat >= 20% x bench (-0.48)",
+    "pass": "False",
+    "span": "2026-08-09..2026-08-16",
+    "bench": -2.378,
+    "strat": -2.378
+   },
+   {
+    "bucket": "extreme_participation",
+    "required": "strat > 0",
+    "pass": "False",
+    "span": "2026-08-16..2026-08-23",
+    "bench": 31.326,
+    "strat": 0.0
+   },
+   {
+    "bucket": "down_shield",
+    "required": "strat >= 20% x bench (-0.34)",
+    "pass": "False",
+    "span": "2026-08-23..2026-08-30",
+    "bench": -1.705,
+    "strat": -1.15
+   },
+   {
+    "bucket": "uptrend_participation",
+    "required": "strat >= 60% x bench (2.33)",
+    "pass": "False",
+    "span": "2026-08-30..2026-09-06",
+    "bench": 3.889,
+    "strat": -0.05
+   }
+  ],
+  "down_shield_passed": false,
+  "uptrend_participation_passed": false,
+  "extreme_participation_passed": false,
+  "medium_term_edge_passed": "False",
+  "consistency_passed": "False",
+  "entries_gate_passed": true,
+  "mean_entries_when_active": 3.33,
+  "active_deployment_ratio": 0.75,
+  "active_deployment_passed": true,
+  "test_rule": {
+   "bucket": "uptrend_participation",
+   "required": "strat >= 60% x bench (4.08)",
+   "pass": "False",
+   "bench": 6.797,
+   "strat": -2.685
+  },
+  "test_charter_passed": "False",
+  "edge": {
+   "champion": null,
+   "champion_oos_mean_excess": null,
+   "passed": null
+  },
+  "failed_gates": [
+   "down_shield(capital_floor)",
+   "uptrend_participation(60%)",
+   "extreme_participation(bench>=15.0%)",
+   "medium_term_edge(2.0%)",
+   "consistency(t>0)",
+   "test_charter(uptrend_participation)"
+  ],
+  "verdict": "REJECT",
+  "charter": "JP 2026-10-01 (asymmetric, compounding-corrected): downside absorption <= 20% of bench drop, uptrend capture >= 60% of bench, extreme melt-ups (bench >= +15.0% -> strat>0), mean excess > 2.0% with t>0"
+ },
+ "noise": {
+  "base_sharpe": 1.82,
+  "mean_noise_sharpe": 2.684,
+  "ratio": 1.475,
+  "threshold": 0.75,
+  "factors": [
+   0.975,
+   0.9875,
+   1.0125,
+   1.025
+  ],
+  "passed": true
+ },
+ "cross_asset": {
+  "asset": "BTC/USDT",
+  "windows": 4,
+  "mean_excess_pct": -2.04,
+  "positive_windows": "1/4",
+  "note": "informational: untuned transfer of ETH-optimized params"
+ },
+ "oos": {
+  "mean_excess_pct": -8.678
+ },
+ "overtrade_penalty_per_entry": 0.001,
+ "allow_shorts": true,
+ "fee": 0.0008,
+ "generated_at": "2026-10-04T07:27:14.734913+00:00"
+}
