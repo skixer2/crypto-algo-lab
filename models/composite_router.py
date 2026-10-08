@@ -54,6 +54,9 @@ class RouterParams:
     vol_slow: int = 96
     grind_slope_bars: int = 96        # 4th state: slow grind-down detector (24h @ 15m)
     grind_confirm_bars: int = 48      # v2.1: sustained negative-slope confirmation (12h @ 15m)
+    pos_scale_expansion: float = 1.0   # conviction sizing (JP 2026-10-08)
+    pos_scale_chop: float = 0.5
+    pos_scale_bear: float = 1.0
     # per-specialist entry thresholds
     meltup_threshold: float = 0.35
     chop_threshold: float = 0.35
@@ -163,6 +166,10 @@ class CompositeRouterModel:
 
         indicators = {"entry_price": price, "regime": regime, "routed": role,
                       "signal": round(sig, 4), "atr": round(atr, 4)}
+        scale = {"confirmed_bearish": self.p.pos_scale_bear,
+                 "grind_down": 0.0,
+                 "vol_compressed": self.p.pos_scale_chop,
+                 "expansion": self.p.pos_scale_expansion}.get(regime, 1.0)
         if action == "long":
             indicators["stop_loss"] = max(price - self.p.atr_stop_mult * atr, 1e-9)
             indicators["take_profit"] = price + self.p.atr_take_mult * atr
@@ -170,7 +177,7 @@ class CompositeRouterModel:
             indicators["stop_loss"] = price + self.p.atr_stop_mult * atr
             indicators["take_profit"] = max(price - self.p.atr_take_mult * atr, 1e-9)
         self._last_indicators = indicators
-        return action, self.p.max_position_pct, indicators
+        return action, self.p.max_position_pct * scale, indicators
 
     def get_indicators(self) -> Dict:
         return self._last_indicators

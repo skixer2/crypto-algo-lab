@@ -28,8 +28,13 @@ from models.composite_router import CompositeRouterModel, RouterParams
 from tuner.holdout import guard_data_end
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-EXEC = os.path.join(REPO, "framework", "data_cache", "okx_ETH_USDT_15m_20210101_20260928.csv")
-BIAS = os.path.join(REPO, "framework", "data_cache", "okx_ETH_USDT_1h_20210101_20260928.csv")
+import argparse as _ap
+_pre = _ap.ArgumentParser(add_help=False)
+_pre.add_argument("--symbol", default="ETH/USDT")
+_args, _ = _pre.parse_known_args()
+_sym = _args.symbol.replace("/", "_")
+EXEC = os.path.join(REPO, "framework", "data_cache", f"okx_{_sym}_15m_20210101_20260928.csv")
+BIAS = os.path.join(REPO, "framework", "data_cache", f"okx_{_sym}_1h_20210101_20260928.csv")
 PAD_DAYS = 7  # warmup pad: 7d = 672 bars > max(donchian 288 + confirm 96, warmup 400)
 
 
@@ -61,6 +66,7 @@ def _bench(start, end, bench_df):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--label", required=True)
+    ap.add_argument("--symbol", default="ETH/USDT")
     ap.add_argument("--start", default="2021-01-01")
     ap.add_argument("--end", default="2026-07-28")
     ap.add_argument("--windows", type=int, default=12)
