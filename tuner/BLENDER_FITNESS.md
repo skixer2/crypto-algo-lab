@@ -38,9 +38,11 @@ sweep starts and recorded in the run config.
 ## Veto lines — kill-switches, NEVER targets (JP 2026-10-05)
 - per-window MDD > 15% → candidate purged (score = −inf)
 - full-run MDD > 25% → purged
-- crash-shield: when bench draws down > 20% in a window, strat MDD must be
-  ≤ ~half the bench's, else purged ("−25% tolerable only if market −50%":
-  tolerated, never rewarded)
+- crash-shield: when bench draws down > 20% in a window, strat MDD over the
+  DOWN-LEG must be ≤ ~half the bench's, else purged ("−25% tolerable only if
+  market −50%": tolerated, never rewarded). Scope = down-leg (r50 audit):
+  the shield is judged during the crash; recovery-entry volatility is NOT
+  punished — else up-capture and crash-shield become jointly infeasible.
 
 ## Total
     score = w_e·excess + w_c·consistency + w_d·down_excess + w_u·up_capture
@@ -52,5 +54,15 @@ sweep starts and recorded in the run config.
 - Nested walk-forward on 2021-01-01 → 2026-07-28 (sealed); holdout
   Jul 28 → Sep 28 consumed ONCE, after, by the final verification run.
 - PBO (CSCV) computed on the sweep; reported with the result.
+- WINDOW-BLOCK BOOTSTRAP (r50 Q3, adopted-modified): winner's stored
+  per-window results resampled at monthly granularity (episode-preserving;
+  path-shuffling variants REJECTED — they destroy regime episodes, the
+  structure our edge lives in). Report excess distribution + stability;
+  zero extra simulations. Path-shuffle archives: not adopted.
+- Hysteresis: chop<->expansion boundary uses a Schmitt trigger (enter
+  <0.75, exit >0.85). Weight-fading at transitions: REJECTED (re-imports
+  blend dilution, alphas 011-014; the fast lane stays fast).
+- 20% free flat-time band: retained (operator-approved). Tightening option
+  (10%) noted 2026-10-09, operator decision pending.
 - Specialist pool admission: quadrant-segment quality per phase-2 doctrine
   (in-regime consistency ≥ 2 episodes; out-of-regime flatness/earning).

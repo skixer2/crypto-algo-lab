@@ -49,7 +49,8 @@ class RouterParams:
     # regime detection (trailing, causal)
     donchian_bars: int = 192              # mid-band window (48h @ 15m)
     confirm_bars: int = 96                # sustained-below-mid confirmation (24h)
-    vol_compression: float = 0.75         # TR ratio below this = compressed
+    vol_compression: float = 0.75         # TR ratio below this = compressed (enter)
+    vol_exit_ratio: float = 0.85          # v2.2 Schmitt trigger: exit chop only above this
     vol_fast: int = 14
     vol_slow: int = 96
     grind_slope_bars: int = 96        # 4th state: slow grind-down detector (24h @ 15m)
@@ -151,7 +152,7 @@ class CompositeRouterModel:
             self._last_indicators = {"entry_price": price, "regime": "grind_down",
                                      "routed": "cash", "signal": 0.0, "atr": round(atr, 4)}
             return "flat", 0.0, self._last_indicators
-        elif volr < self.p.vol_compression:
+        elif bool(self._compressed.iat[i]):
             role, threshold, regime = "chop", self.p.chop_threshold, "vol_compressed"
         else:
             role, threshold, regime = "meltup", self.p.meltup_threshold, "expansion"
@@ -213,6 +214,18 @@ class CompositeRouterModel:
         tr_fast = tr.rolling(self.p.vol_fast, min_periods=5).mean()
         tr_slow = tr.rolling(self.p.vol_slow, min_periods=24).mean().replace(0, 1e-9)
         self._volratio = (tr_fast / tr_slow).fillna(1.0)
+        # v2.2: Schmitt trigger on compression (Gemini r50 Q4, adopted):
+        # enter chop below vol_compression, stay until vol_exit_ratio exceeded.
+        vr = self._volratio.to_numpy()
+        comp = np.zeros(len(vr), dtype=bool)
+        state = False
+        for k in range(len(vr)):
+            if not state and vr[k] < self.p.vol_compression:
+                state = True
+            elif state and vr[k] > self.p.vol_exit_ratio:
+                state = False
+            comp[k] = state
+        self._compressed = pd.Series(comp, index=self._volratio.index)
         below = (c < self._mid).astype(float)
         self._below_sustained = below.rolling(self.p.confirm_bars,
                                               min_periods=self.p.confirm_bars).mean() >= 0.9
