@@ -105,8 +105,9 @@ def time_out_pct(eq: pd.DataFrame, win_start, win_end) -> float:
 
 
 def out_penalty_pct(time_out: float) -> float:
-    """Excess points of penalty: free below 20% out, then superlinear.
-    30% out -> 1.0 pt, 40% -> 2.8, 60% -> 8.0 (JP-approved curve)."""
-    if time_out != time_out or time_out <= 20.0:
+    """Excess points of penalty: free below 10% out, then superlinear.
+    JP 2026-10-09: band tightened 20->10. 20% out -> 1.0 pt, 30% -> 2.8,
+    40% -> 5.2, 60% -> 11.2."""
+    if time_out != time_out or time_out <= 10.0:
         return 0.0
-    return ((time_out - 20.0) / 10.0) ** 1.5
+    return ((time_out - 10.0) / 10.0) ** 1.5

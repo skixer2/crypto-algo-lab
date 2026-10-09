@@ -28,8 +28,9 @@ sweep starts and recorded in the run config.
 ## Time-out penalty (JP 2026-10-07) — "out is legal but expensive"
 - `time_out_pct` measured from equity curves (in-position bars = MTM
   movement; flat bars = no movement).
-- `penalty_out = ((time_out_pct − 20) / 10)^1.5` excess points, zero below
-  20%: 30% out → 1.0 pt · 40% → 2.8 · 60% → 8.0.
+- `penalty_out = ((time_out_pct − 10) / 10)^1.5` excess points, zero below
+  10% (JP 2026-10-09: band tightened from 20): 20% out → 1.0 pt · 30% → 2.8
+  · 40% → 5.2 · 60% → 11.2.
 - Doctrine: default posture is LONG (crypto drift). Short requires
   confirmation; OUT requires confirmation. The router's states already
   comply (grind_down cash is 48-bar-confirmed; expansion defaults long).
@@ -62,7 +63,6 @@ sweep starts and recorded in the run config.
 - Hysteresis: chop<->expansion boundary uses a Schmitt trigger (enter
   <0.75, exit >0.85). Weight-fading at transitions: REJECTED (re-imports
   blend dilution, alphas 011-014; the fast lane stays fast).
-- 20% free flat-time band: retained (operator-approved). Tightening option
-  (10%) noted 2026-10-09, operator decision pending.
+- Free flat-time band: 10% (operator decision 2026-10-09, tightened from 20).
 - Specialist pool admission: quadrant-segment quality per phase-2 doctrine
   (in-regime consistency ≥ 2 episodes; out-of-regime flatness/earning).
