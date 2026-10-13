@@ -28,7 +28,8 @@ from models.wq_alpha_fast import prepare_fast_context
 from tuner.alpha_orchestrator import run_backtest
 
 POOL = ["alpha_004", "alpha_008", "alpha_024", "alpha_027", "alpha_028",
-        "alpha_029", "alpha_032", "alpha_035", "alpha_039", "alpha_040"]
+        "alpha_029", "alpha_032", "alpha_035", "alpha_039", "alpha_040",
+        "alpha_048", "alpha_050"]
 START, END = "2021-01-01T00:00:00+00:00", "2026-07-28T00:00:00+00:00"
 CSV = {tf: os.path.join("framework", "data_cache", f"okx_ETH_USDT_{tf}_20210101_20260928.csv")
        for tf in ("15m", "1h")}
