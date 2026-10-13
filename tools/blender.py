@@ -141,8 +141,9 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists):
         if np.abs(W[li]).sum() > 1.0 + 1e-9:
             return -np.inf, "lane exposure >1"
     wl = np.zeros((len(rets), n_specialists))
+    lob = lane_of_bar if str(lane_of_bar.dtype).startswith("int") else None
     for li, lane in enumerate(LANES):
-        mask = lane_of_bar == lane
+        mask = (lane_of_bar == li) if lob is not None else (lane_of_bar == lane)
         wl[mask] = W[li]
     expo = wl.sum(axis=1)
     port_ret = (wl * rets.to_numpy()).sum(axis=1)
@@ -213,7 +214,29 @@ def main():
     import optuna
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
+    # v2.1: detector grid (48 precomputed lane series) as a searchable dim
+    GRID_NPZ = os.path.join(REPO, "data", "precompute", "regime_grid.npz")
+    grid_codes = None
+    n_det = 1
+    default_det = 0
+    if os.path.exists(GRID_NPZ):
+        z = np.load(GRID_NPZ)
+        gidx = pd.DatetimeIndex(z["index"].astype("int64"))
+        pos = gidx.asi8.searchsorted(pd.DatetimeIndex(rets.index).asi8)
+        grid_codes = z["lanes"][:, pos]  # align columns to specialist-curve bars
+        n_det = grid_codes.shape[0]
+        meta = json.load(open(os.path.join(REPO, "data", "precompute", "regime_grid.json")))
+        for m in meta:  # router v2.2 defaults
+            if (m["donchian"], m["confirm"], (m["vol_enter"], m["vol_exit"]),
+                (m["grind_slope"], m["grind_confirm"])) == (192, 96, (0.75, 0.85), (96, 48)):
+                default_det = m["i"]
+                break
+        print(f"detector grid: {n_det} series; v2.2-default = index {default_det}")
+
+    TRIAL_LOG = []
     def objective(trial):
+        det = trial.suggest_categorical("detector", list(range(n_det))) if n_det > 1 else default_det
+        lob = grid_codes[det] if grid_codes is not None else None
         weights = {}
         for lane_name in ("confirmed_bearish", "vol_compressed", "expansion"):
             w = np.zeros(len(names))
@@ -225,13 +248,30 @@ def main():
             if s > 1.0:
                 w = w / s
             weights[lane_name] = w
-        score, det = evaluate(weights, rets, lane_of_bar, bench["close"], months, len(names))
+        lob_use = lob if lob is not None else lane_of_bar
+        score, det = evaluate(weights, rets, lob_use, bench["close"], months, len(names))
         if score == -np.inf:
+            TRIAL_LOG.append({"score": -50.0, "vetoed": det, "excesses": None})
             return -50.0  # below any real score, visible-but-vetoed
+        TRIAL_LOG.append({"score": score, "vetoed": None,
+                           "excesses": [w["excess"] for w in det["windows"]]})
         return score
 
     study = optuna.create_study(direction="maximize",
                                 sampler=optuna.samplers.TPESampler(seed=args.seed))
+    # v2.1: enqueue the standing champion's exact weights (guaranteed >= its score)
+    champ_path = os.path.join(REPO, "tuner", "runs", "blender_v1b.json")
+    if os.path.exists(champ_path):
+        champ = json.load(open(champ_path))
+        params = {"detector": default_det}
+        for nm in names:
+            for lane_name in ("confirmed_bearish", "vol_compressed", "expansion"):
+                w = champ["weights"].get(lane_name, {}).get(nm)
+                params[f"{lane_name[:3]}_{nm}"] = 1 if w else 0
+                if w:
+                    params[f"w_{lane_name[:3]}_{nm}"] = w
+        study.enqueue_trial(params)
+        print("enqueued v1b champion as trial 1")
     study.optimize(objective, n_trials=args.trials, show_progress_bar=False)
 
     # reconstruct best
@@ -254,6 +294,7 @@ def main():
            "details": {k: v for k, v in det.items() if k != "windows"},
            "windows": [{"month": str(s.date()), **{k: (round(v, 2) if isinstance(v, float) else v)
                      for k, v in w.items()}} for (s, e), w in zip(months, det["windows"])]}
+    json.dump(TRIAL_LOG, open(os.path.join(REPO, "tuner", "runs", f"{args.label}_trials.json"), "w"))
     path = os.path.join(REPO, "tuner", "runs", f"{args.label}.json")
     json.dump(out, open(path, "w"), indent=1)
     print(f"BEST score {score:+.2f} | mean excess {det['mean_excess']:+.2f}% | t {det['t']:+.2f} | "

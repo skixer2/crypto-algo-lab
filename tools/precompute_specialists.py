@@ -29,7 +29,7 @@ from tuner.alpha_orchestrator import run_backtest
 
 POOL = ["alpha_004", "alpha_008", "alpha_024", "alpha_027", "alpha_028",
         "alpha_029", "alpha_032", "alpha_035", "alpha_039", "alpha_040",
-        "alpha_048", "alpha_050"]
+        "alpha_048", "alpha_050", "alpha_056"]
 START, END = "2021-01-01T00:00:00+00:00", "2026-07-28T00:00:00+00:00"
 CSV = {tf: os.path.join("framework", "data_cache", f"okx_ETH_USDT_{tf}_20210101_20260928.csv")
        for tf in ("15m", "1h")}
@@ -57,7 +57,8 @@ def best_params_for(formula: str):
 
 def main():
     ctx_cache = {}
-    manifest = {}
+    mpath = os.path.join(OUT_DIR, "manifest.json")
+    manifest = json.load(open(mpath)) if os.path.exists(mpath) else {}  # MERGE, never replace
     for f in POOL:
         out = os.path.join(OUT_DIR, f"{f}.csv.gz")
         if os.path.exists(out):
@@ -87,7 +88,7 @@ def main():
                        "params": params, "span": [START, END],
                        "rows": len(eq), "sec": round(time.time() - t0, 1),
                        "final_equity": float(eq["equity"].iloc[-1])}
-        json.dump(manifest, open(os.path.join(OUT_DIR, "manifest.json"), "w"), indent=1)
+        json.dump(manifest, open(mpath, "w"), indent=1)
         print(f"[{f}] DONE {len(eq)} rows in {time.time()-t0:.0f}s "
               f"(params from {src}, window excess {exc:+.1f})", flush=True)
     print("PRECOMPUTE COMPLETE", flush=True)
