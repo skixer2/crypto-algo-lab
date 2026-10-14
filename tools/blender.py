@@ -50,14 +50,19 @@ TRADABLE = {"confirmed_bearish": None, "vol_compressed": None, "expansion": None
 def load_specialists():
     man = json.load(open(os.path.join(PRE, "manifest.json")))
     curves, names = [], []
+    pos = {}
     for f in sorted(man.keys()):
         df = pd.read_csv(os.path.join(PRE, f"{f}.csv.gz"))
         df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
-        curves.append(df.set_index("timestamp")["equity"])
+        d = df.set_index("timestamp")
+        curves.append(d["equity"])
+        pos[f] = d["position"] if "position" in d.columns else pd.Series(0.0, index=d.index)
         names.append(f)
     eq = pd.concat(curves, axis=1)
     eq.columns = names
-    return eq.pct_change().fillna(0.0), names
+    P = pd.concat([pos[n] for n in names], axis=1)
+    P.columns = names
+    return eq.pct_change().fillna(0.0), names, P.fillna(0.0)
 
 
 def regime_series(bench: pd.DataFrame) -> pd.Series:
@@ -130,8 +135,10 @@ def mdd_penalty(mdd):  # JP law 2026-10-05
     return (mdd / 5.0) ** 1.5
 
 
-def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists):
-    """weights: dict lane -> np.array(n). Returns (score, details) or (-inf, reason)."""
+def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=None):
+    """weights: dict lane -> np.array(n). pos_mat: (bars, n) internal positions for
+    NETTED fee accounting (JP 2026-10-14): fees apply only to changes of the NET
+    market exposure sum_i w_i * pos_i — internal-ledger netting, not per-specialist trades."""
     W = np.zeros((len(LANES), n_specialists))
     for li, lane in enumerate(LANES):
         if lane in weights:
@@ -145,9 +152,13 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists):
     for li, lane in enumerate(LANES):
         mask = (lane_of_bar == li) if lob is not None else (lane_of_bar == lane)
         wl[mask] = W[li]
-    # turnover cost on COMPOSITION changes (lane switches = sell one specialist, buy another)
-    turn = np.abs(np.diff(wl, axis=0, prepend=np.zeros((1, wl.shape[1])))).sum(axis=1)
-    port_ret = (wl * rets.to_numpy()).sum(axis=1) - FEE * turn
+    w_ret = (wl * rets.to_numpy()).sum(axis=1)
+    if pos_mat is not None:
+        net_expo = (wl * pos_mat.to_numpy()).sum(axis=1)
+        turn = np.abs(np.diff(net_expo, prepend=0.0))
+    else:
+        turn = np.abs(np.diff(wl.sum(axis=1), prepend=0.0))
+    port_ret = w_ret - FEE * turn
     port_eq = pd.Series(np.cumprod(1 + port_ret), index=rets.index)
 
     excesses, wm_list = [], []
@@ -172,8 +183,8 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists):
     run_mdd = worst_mdd
     if run_mdd > 25.0:
         return -np.inf, f"run MDD {run_mdd:.1f}%"
-    # out-penalty: time with |exposure| < 0.05
-    time_out = float((np.abs(expo) < 0.05).mean() * 100)
+    net_abs = np.abs((wl * pos_mat.to_numpy()).sum(axis=1)) if pos_mat is not None else np.abs(expo)
+    time_out = float((net_abs < 0.05).mean() * 100)
     pen_out = out_penalty_pct(time_out)
     pen_mdd = mdd_penalty(run_mdd)
     # segment terms
@@ -199,7 +210,7 @@ def main():
     ap.add_argument("--seed", type=int, default=7)
     args = ap.parse_args()
 
-    rets, names = load_specialists()
+    rets, names, POS = load_specialists()
     bench = pd.read_csv(EXEC_CSV, parse_dates=["timestamp"], index_col="timestamp").sort_index()
     bench = bench.loc[rets.index[0]:]
     lane = regime_series(bench).loc[rets.index]
@@ -286,7 +297,7 @@ def main():
         if s > 1.0:
             w = w / s
         weights[lane_name] = w
-    score, det = evaluate(weights, rets, lob_best, bench["close"], months, len(names))
+    score, det = evaluate(weights, rets, lob_best, bench["close"], months, len(names), pos_mat=POS)
     if score == -np.inf:
         raise SystemExit(f"RECONSTRUCTION VETOED: {det} (should not happen — investigate)")
 

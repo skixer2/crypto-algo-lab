@@ -79,11 +79,20 @@ def main():
             print(f"[{f}] sim FAILED", flush=True)
             continue
         tmp = out + ".tmp"
+        pos_col = "position" in eq.columns
         with gzip.open(tmp, "wt") as fh:
-            fh.write("timestamp,equity\n")
+            fh.write("timestamp,equity,position\n")
             for row in eq.itertuples(index=False):
-                fh.write(f"{row.timestamp},{row.equity:.6f}\n")
+                pv = getattr(row, "position", None)
+                if isinstance(pv, str):
+                    p_ = {"long": 1.0, "short": -1.0}.get(pv, 0.0)
+                elif isinstance(pv, (int, float)) and pv == pv:
+                    p_ = float(pv)
+                else:
+                    p_ = 0.0
+                fh.write(f"{row.timestamp},{row.equity:.6f},{p_:.1f}\n")
         os.replace(tmp, out)
+        print(f"[{f}] position column stored: {pos_col}")
         manifest[f] = {"src_run": src, "best_window_excess": exc,
                        "params": params, "span": [START, END],
                        "rows": len(eq), "sec": round(time.time() - t0, 1),
