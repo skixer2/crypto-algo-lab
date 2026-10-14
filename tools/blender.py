@@ -131,8 +131,8 @@ def out_penalty_pct(t):  # JP law 2026-10-09 (10% band)
     return 0.0 if (t != t or t <= 10.0) else ((t - 10.0) / 10.0) ** 1.5
 
 
-def mdd_penalty(mdd):  # JP law 2026-10-05
-    return (mdd / 5.0) ** 1.5
+def mdd_penalty(mdd):  # JP law v2, 2026-10-14: free <=15%, linear score haircut to 100% at 65%
+    return float(np.clip((mdd - 15.0) / 50.0, 0.0, 1.0))
 
 
 def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=None):
@@ -171,22 +171,18 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
         excesses.append(wv["excess"])
         wm_list.append(wv)
         worst_mdd = max(worst_mdd, wv["mdd"])
-        # vetoes (law)
-        if wv["mdd"] > 15.0:
-            vetoed = f"window MDD {wv['mdd']:.1f}%"
+        # vetoes: crash-shield retained (relative protection; JP law v2 silent on it)
         if wv["bench_dn_mdd"] > 20.0 and wv["dn_mdd"] > 0.5 * wv["bench_dn_mdd"]:
             vetoed = f"crash-shield {wv['dn_mdd']:.1f} vs bench {wv['bench_dn_mdd']:.1f}"
     if vetoed:
         return -np.inf, vetoed
     mean_exc = float(np.mean(excesses))
     t_stat = float(np.mean(excesses) / (np.std(excesses, ddof=1) / np.sqrt(len(excesses)))) if len(excesses) > 2 else 0.0
-    run_mdd = worst_mdd
-    if run_mdd > 25.0:
-        return -np.inf, f"run MDD {run_mdd:.1f}%"
+    run_mdd = worst_mdd  # JP law v2: no run-MDD veto; linear haircut applies
     net_abs = np.abs((wl * pos_mat.to_numpy()).sum(axis=1)) if pos_mat is not None else np.abs(expo)
     time_out = float((net_abs < 0.05).mean() * 100)
     pen_out = out_penalty_pct(time_out)
-    pen_mdd = mdd_penalty(run_mdd)
+    mdd_frac = mdd_penalty(run_mdd)
     # segment terms
     dn_ex = [w["strat_down"] - w["bench_down"] for w in wm_list]
     caps = [w["up_capture"] for w in wm_list if w["up_capture"] is not None]
@@ -195,8 +191,9 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
     # parsimony: count active specialists
     active = sum(1 for li in range(len(LANES)) for i in range(n_specialists) if abs(W[li][i]) > 0.02)
     par = 0.05 * max(active - 6, 0)
-    score = (1.0 * mean_exc + 0.3 * max(t_stat, 0) + 0.3 * seg_dn + 0.3 * seg_up
-             - pen_mdd - pen_out - par)
+    raw = (1.0 * mean_exc + 0.3 * max(t_stat, 0) + 0.3 * seg_dn + 0.3 * seg_up
+           - pen_out - par)
+    score = raw * (1.0 - mdd_frac)  # JP law v2: multiplicative haircut
     return score, {"mean_excess": mean_exc, "t": t_stat, "seg_dn": seg_dn, "seg_up": seg_up,
                    "run_mdd": run_mdd, "time_out": time_out, "active": active,
                    "windows": wm_list}

@@ -17,13 +17,11 @@ sweep starts and recorded in the run config.
   Rewards RECOVERY-START ENTRY: full capture requires being in from the
   leg's beginning. Target ≥ 0.6 in V-shaped windows.
 
-## Drawdown — PURE COST, no zero-reward floor (JP 2026-10-05)
-- `penalty_mdd = (MDD% / 5)^1.5` in excess points: each 5% of drawdown
-  costs at least one point, superlinearly beyond.
-- 5% MDD → 1.0 pt · 10% → 2.8 · 14% → 4.7. Return leads; turbulence must
-  be out-earned.
-- Final k calibrated ONCE from pool MDD/excess distribution before the
-  sweep, then locked and documented.
+## Drawdown — JP LAW v2 (2026-10-14; supersedes 10-05 monotonic cost + 15/25 vetoes)
+- Free zone: MDD <= 15% -> no penalty.
+- Linear score haircut: 15% < MDD < 65% -> final = raw_score x (1 - (MDD-15)/50).
+- MDD >= 65% -> score zeroed. Multiplicative: returns buy drawdown tolerance
+  proportionally (JP example: raw 100 @15% beats raw 150 @40% -> 75).
 
 ## Time-out penalty (JP 2026-10-07) — "out is legal but expensive"
 - `time_out_pct` measured from equity curves (in-position bars = MTM
@@ -36,9 +34,7 @@ sweep starts and recorded in the run config.
   comply (grind_down cash is 48-bar-confirmed; expansion defaults long).
   Cowardice must be out-earned, and the shield free-rider problem dies.
 
-## Veto lines — kill-switches, NEVER targets (JP 2026-10-05)
-- per-window MDD > 15% → candidate purged (score = −inf)
-- full-run MDD > 25% → purged
+## Veto lines (JP law v2: only crash-shield remains)
 - crash-shield: when bench draws down > 20% in a window, strat MDD over the
   DOWN-LEG must be ≤ ~half the bench's, else purged ("−25% tolerable only if
   market −50%": tolerated, never rewarded). Scope = down-leg (r50 audit):
