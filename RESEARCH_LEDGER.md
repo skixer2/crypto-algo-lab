@@ -17,6 +17,9 @@ Vault (MEMORY.md/HEARTBEAT.md) carries pointers, not details.
 | 10-13 | Detector = critical path (JP: "regime misdetected ⇒ alphas worthless") |
 | 10-13 | NN placement: regime classification / skill-labels, NOT blend weights (refit-cadence law) |
 | 10-13 | Skill-map labeling (JP): regimes defined by WHICH alphas work, not price-shape abstractions |
+| 10-14 | NETTED fee accounting (JP): fees on change in NET exposure only — internal ledger, not per-specialist trades |
+| 10-14 | **JP law v2**: MDD free ≤15%, linear multiplicative haircut to 65% (supersedes monotonic cost + 15/25 vetoes); crash-shield veto RETAINED (JP-approved 17:11) |
+| 10-14 | Execution policy: maker entries (0.02%) / taker protective exits (0.05%) |
 | — | Sim fee 0.0008 = conservative floor; holdout reports taker/maker scenarios; venue = OKX perp sub-account, 1× only |
 
 ## 2. EXPERIMENT LEDGER (major arcs; formulas 001-055 detail in tuner/runs/)
