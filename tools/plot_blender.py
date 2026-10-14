@@ -29,7 +29,7 @@ RUN = sys.argv[1] if len(sys.argv) > 1 else "blender_v1b"
 d = json.load(open(os.path.join(REPO, "tuner", "runs", f"{RUN}.json")))
 NORM = 100.0
 
-rets, names = load_specialists()
+rets, names, POS = load_specialists()
 bench = pd.read_csv(os.path.join(REPO, "framework/data_cache/okx_ETH_USDT_15m_20210101_20260928.csv"),
                     parse_dates=["timestamp"], index_col="timestamp").sort_index()
 bench = bench.loc[rets.index[0]:]
@@ -52,8 +52,9 @@ lane_arr = lane.to_numpy()
 wl = np.zeros((len(rets), len(names)))
 for li, ln in enumerate(LANES):
     wl[lane_arr == ln] = W[li]
-expo = wl.sum(axis=1)
-port_ret = (wl * rets.to_numpy()).sum(axis=1) - FEE * np.abs(np.diff(expo, prepend=0.0))
+pos = POS.to_numpy()
+net_expo = (wl * pos).sum(axis=1)
+port_ret = (wl * rets.to_numpy()).sum(axis=1) - FEE * np.abs(np.diff(net_expo, prepend=0.0))
 port = pd.Series(np.cumprod(1 + port_ret), index=rets.index)
 
 anchor = pd.Timestamp("2021-04-01", tz="UTC")
