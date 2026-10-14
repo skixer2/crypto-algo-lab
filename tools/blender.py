@@ -145,11 +145,9 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists):
     for li, lane in enumerate(LANES):
         mask = (lane_of_bar == li) if lob is not None else (lane_of_bar == lane)
         wl[mask] = W[li]
-    expo = wl.sum(axis=1)
-    port_ret = (wl * rets.to_numpy()).sum(axis=1)
-    # turnover cost on exposure changes
-    turn = np.abs(np.diff(expo, prepend=0.0))
-    port_ret = port_ret - FEE * turn
+    # turnover cost on COMPOSITION changes (lane switches = sell one specialist, buy another)
+    turn = np.abs(np.diff(wl, axis=0, prepend=np.zeros((1, wl.shape[1])))).sum(axis=1)
+    port_ret = (wl * rets.to_numpy()).sum(axis=1) - FEE * turn
     port_eq = pd.Series(np.cumprod(1 + port_ret), index=rets.index)
 
     excesses, wm_list = [], []
@@ -276,6 +274,8 @@ def main():
 
     # reconstruct best
     bp = study.best_params
+    best_det = bp.get("detector", default_det)
+    lob_best = grid_codes[best_det] if grid_codes is not None else lane_of_bar
     weights = {}
     for lane_name in ("confirmed_bearish", "vol_compressed", "expansion"):
         w = np.zeros(len(names))
@@ -286,9 +286,11 @@ def main():
         if s > 1.0:
             w = w / s
         weights[lane_name] = w
-    score, det = evaluate(weights, rets, lane_of_bar, bench["close"], months, len(names))
+    score, det = evaluate(weights, rets, lob_best, bench["close"], months, len(names))
+    if score == -np.inf:
+        raise SystemExit(f"RECONSTRUCTION VETOED: {det} (should not happen — investigate)")
 
-    out = {"label": args.label, "score": round(score, 3),
+    out = {"label": args.label, "detector": int(best_det), "score": round(score, 3),
            "weights": {ln: {nm: round(float(w[i]), 3) for i, nm in enumerate(names) if abs(w[i]) > 0.02}
                         for ln, w in weights.items()},
            "details": {k: v for k, v in det.items() if k != "windows"},

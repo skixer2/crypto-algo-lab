@@ -107,7 +107,7 @@ fig.update_layout(
            f"out {det['time_out']:.0f}% · {det['active']} specialists<br>"
            f"<span style='font-size:11px'>shading: red=confirmed_bearish · yellow=chop · gray=grind · green=expansion | "
            f"weights frozen from search; curve = exact arithmetic over precomputed specialist curves (incl. their fees + turnover cost)</span>"),
-    legend=dict(orientation="h", y=1.05), margin=dict(l=50, r=20, t=90, b=30),
+    legend=dict(orientation="h", y=-0.08), margin=dict(l=50, r=20, t=110, b=110),
 )
 fig.update_xaxes(type="date", row=1, col=1)
 fig.update_yaxes(ticksuffix="", row=1, col=1)
