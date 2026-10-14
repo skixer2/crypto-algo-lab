@@ -33,7 +33,14 @@ rets, names = load_specialists()
 bench = pd.read_csv(os.path.join(REPO, "framework/data_cache/okx_ETH_USDT_15m_20210101_20260928.csv"),
                     parse_dates=["timestamp"], index_col="timestamp").sort_index()
 bench = bench.loc[rets.index[0]:]
-lane = regime_series(bench).loc[rets.index]
+det = d.get("detector")
+z = np.load(os.path.join(REPO, "data/precompute/regime_grid.npz"))
+gidx = pd.DatetimeIndex(z["index"].astype("int64"))
+pos = gidx.asi8.searchsorted(pd.DatetimeIndex(rets.index).asi8)
+codes = z["lanes"][det if det is not None else 32][pos]
+LANES = ["confirmed_bearish", "grind_down", "vol_compressed", "expansion"]
+lane = pd.Series([LANES[c] for c in codes], index=rets.index)
+print(f"using grid detector index {det}")
 
 W = np.zeros((4, len(names)))
 LANES = ["confirmed_bearish", "grind_down", "vol_compressed", "expansion"]
