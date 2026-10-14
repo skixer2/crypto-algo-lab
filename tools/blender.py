@@ -179,7 +179,7 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
     mean_exc = float(np.mean(excesses))
     t_stat = float(np.mean(excesses) / (np.std(excesses, ddof=1) / np.sqrt(len(excesses)))) if len(excesses) > 2 else 0.0
     run_mdd = worst_mdd  # JP law v2: no run-MDD veto; linear haircut applies
-    net_abs = np.abs((wl * pos_mat.to_numpy()).sum(axis=1)) if pos_mat is not None else np.abs(expo)
+    net_abs = np.abs((wl * pos_mat.to_numpy()).sum(axis=1)) if pos_mat is not None else np.abs(wl.sum(axis=1))
     time_out = float((net_abs < 0.05).mean() * 100)
     pen_out = out_penalty_pct(time_out)
     mdd_frac = mdd_penalty(run_mdd)
@@ -255,7 +255,7 @@ def main():
                 w = w / s
             weights[lane_name] = w
         lob_use = lob if lob is not None else lane_of_bar
-        score, det = evaluate(weights, rets, lob_use, bench["close"], months, len(names))
+        score, det = evaluate(weights, rets, lob_use, bench["close"], months, len(names), pos_mat=POS)
         if score == -np.inf:
             TRIAL_LOG.append({"score": -50.0, "vetoed": det, "excesses": None})
             return -50.0  # below any real score, visible-but-vetoed
