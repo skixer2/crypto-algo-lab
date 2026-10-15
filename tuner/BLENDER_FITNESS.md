@@ -34,12 +34,12 @@ sweep starts and recorded in the run config.
   comply (grind_down cash is 48-bar-confirmed; expansion defaults long).
   Cowardice must be out-earned, and the shield free-rider problem dies.
 
-## Veto lines (JP law v2: only crash-shield remains)
-- crash-shield: when bench draws down > 20% in a window, strat MDD over the
-  DOWN-LEG must be ≤ ~half the bench's, else purged ("−25% tolerable only if
-  market −50%": tolerated, never rewarded). Scope = down-leg (r50 audit):
-  the shield is judged during the crash; recovery-entry volatility is NOT
-  punished — else up-capture and crash-shield become jointly infeasible.
+## Crash-shield — SOFT (JP 2026-10-15; replaces the last hard veto)
+- Allowance: SDD <= frac(BDD) x BDD, frac linear 0.7 at BDD<=10% -> 0.5 at BDD>=50%.
+- Excess x (percentage points) penalizes the score percentage at rate linear
+  from x/10 (BDD<=10%) to x (BDD>=50%), summed over crash windows, capped 100.
+- Multiplicative with the law-v2 MDD haircut: final = raw x (1-mdd_frac) x (1-shield_pen%).
+- x defined as percentage POINTS of excess drawdown (JP confirmed reading pending).
 
 ## Total
     score = w_e·excess + w_c·consistency + w_d·down_excess + w_u·up_capture

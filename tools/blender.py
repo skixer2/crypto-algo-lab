@@ -162,8 +162,16 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
     port_eq = pd.Series(np.cumprod(1 + port_ret), index=rets.index)
 
     excesses, wm_list = [], []
-    vetoed = None
     worst_mdd = 0.0
+
+    def _soft_shield(bdd, sdd):
+        frac = float(np.interp(bdd, [10.0, 50.0], [0.7, 0.5]))
+        allowed = frac * bdd
+        if sdd <= allowed or bdd <= 1.0:
+            return 0.0
+        x = sdd - allowed
+        g = float(np.interp(bdd, [10.0, 50.0], [0.1, 1.0]))
+        return x * g
     for (s, e) in months:
         wv = window_metrics(port_eq, bench_close, s, e)
         if wv is None:
@@ -171,11 +179,9 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
         excesses.append(wv["excess"])
         wm_list.append(wv)
         worst_mdd = max(worst_mdd, wv["mdd"])
-        # vetoes: crash-shield retained (relative protection; JP law v2 silent on it)
-        if wv["bench_dn_mdd"] > 20.0 and wv["dn_mdd"] > 0.5 * wv["bench_dn_mdd"]:
-            vetoed = f"crash-shield {wv['dn_mdd']:.1f} vs bench {wv['bench_dn_mdd']:.1f}"
-    if vetoed:
-        return -np.inf, vetoed
+        # SOFT crash-shield (JP 2026-10-15): allowance frac 0.7@BDD<=10 -> 0.5@BDD>=50;
+        # excess x pts penalizes score pct at rate 0.1x@BDD<=10 -> x@BDD>=50. No veto.
+    shield_pen = 0.0  # summed score-percentage penalty (soft law)
     mean_exc = float(np.mean(excesses))
     t_stat = float(np.mean(excesses) / (np.std(excesses, ddof=1) / np.sqrt(len(excesses)))) if len(excesses) > 2 else 0.0
     run_mdd = worst_mdd  # JP law v2: no run-MDD veto; linear haircut applies
@@ -183,6 +189,11 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
     time_out = float((net_abs < 0.05).mean() * 100)
     pen_out = out_penalty_pct(time_out)
     mdd_frac = mdd_penalty(run_mdd)
+    shield_pen = 0.0
+    for w in wm_list:
+        if w.get("bench_dn_mdd"):
+            shield_pen += _soft_shield(w["bench_dn_mdd"], w["dn_mdd"])
+    shield_pen = min(shield_pen, 100.0)
     # segment terms
     dn_ex = [w["strat_down"] - w["bench_down"] for w in wm_list]
     caps = [w["up_capture"] for w in wm_list if w["up_capture"] is not None]
@@ -193,7 +204,7 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
     par = 0.05 * max(active - 6, 0)
     raw = (1.0 * mean_exc + 0.3 * max(t_stat, 0) + 0.3 * seg_dn + 0.3 * seg_up
            - pen_out - par)
-    score = raw * (1.0 - mdd_frac)  # JP law v2: multiplicative haircut
+    score = raw * (1.0 - mdd_frac) * (1.0 - shield_pen / 100.0)  # law v2 x soft shield
     return score, {"mean_excess": mean_exc, "t": t_stat, "seg_dn": seg_dn, "seg_up": seg_up,
                    "run_mdd": run_mdd, "time_out": time_out, "active": active,
                    "windows": wm_list}
