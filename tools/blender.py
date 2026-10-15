@@ -169,9 +169,9 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
         allowed = frac * bdd
         if sdd <= allowed or bdd <= 1.0:
             return 0.0
-        x = sdd - allowed
+        x_pct = (sdd - allowed) / allowed * 100.0  # JP-confirmed reading (C): relative to allowance
         g = float(np.interp(bdd, [10.0, 50.0], [0.1, 1.0]))
-        return x * g
+        return x_pct * g
     for (s, e) in months:
         wv = window_metrics(port_eq, bench_close, s, e)
         if wv is None:
