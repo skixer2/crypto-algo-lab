@@ -59,7 +59,7 @@ port = pd.Series(np.cumprod(1 + port_ret), index=rets.index)
 
 anchor = pd.Timestamp("2021-04-01", tz="UTC")
 p = port[port.index >= anchor]
-b = bench["close"][bench.index >= anchor]
+b = bench["close"][(bench.index >= anchor) & (bench.index <= p.index[-1])]  # truncate B&H at the seal: like-for-like (JP 2026-10-15)
 pn = p / float(p.iloc[0]) * NORM
 bn = b / float(b.iloc[0]) * NORM
 
@@ -88,7 +88,10 @@ for r, a, bb in spans:
                       line_width=0, row=1, col=1)
 
 ws = d["windows"]
-fig.add_trace(go.Bar(x=[w["month"] for w in ws], y=[w["excess"] for w in ws],
+# bars on the shared DATE axis (month-start timestamps, ~20-day width) -> vertical alignment with panels 1/3
+fig.add_trace(go.Bar(x=[str(pd.Timestamp(w["month"], tz="UTC")) for w in ws],
+                     y=[w["excess"] for w in ws],
+                     width=[20 * 86400000] * len(ws),
                      name="monthly excess", marker_color=np.where(
                          np.array([w["excess"] for w in ws]) >= 0, "#2ca02c", "#c0504d"),
                      opacity=0.85), row=2, col=1)
@@ -107,12 +110,12 @@ fig.update_layout(
            f"mean excess {det['mean_excess']:+.1f}%/mo · t {det['t']:+.2f} · maxDD {det['run_mdd']:.1f}% · "
            f"out {det['time_out']:.0f}% · {det['active']} specialists<br>"
            f"<span style='font-size:11px'>shading: red=confirmed_bearish · yellow=chop · gray=grind · green=expansion | "
-           f"weights frozen from search; curve = exact arithmetic over precomputed specialist curves (incl. their fees + turnover cost)</span>"),
+           f"weights frozen from search; both series truncated at the seal (2026-07-28) — the two holdout months remain untouched by law</span>"),
     legend=dict(orientation="h", y=-0.08), margin=dict(l=50, r=20, t=110, b=110),
 )
 fig.update_xaxes(type="date", row=1, col=1)
 fig.update_yaxes(ticksuffix="", row=1, col=1)
-fig.update_xaxes(type="category", row=2, col=1, tickfont=dict(size=7), tickangle=45)
+fig.update_xaxes(type="date", row=2, col=1, tickfont=dict(size=7), tickangle=45, dtick="M3")
 fig.update_yaxes(title="excess %", row=2, col=1)
 fig.update_yaxes(title="DD %", row=3, col=1)
 out = os.path.join(REPO, "reports", f"{RUN}_portfolio.html")
