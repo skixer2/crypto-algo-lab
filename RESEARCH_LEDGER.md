@@ -20,6 +20,7 @@ Vault (MEMORY.md/HEARTBEAT.md) carries pointers, not details.
 | 10-14 | NETTED fee accounting (JP): fees on change in NET exposure only — internal ledger, not per-specialist trades |
 | 10-14 | **JP law v2**: MDD free ≤15%, linear multiplicative haircut to 65% (supersedes monotonic cost + 15/25 vetoes); crash-shield veto RETAINED (JP-approved 17:11) |
 | 10-14 | Execution policy: maker entries (0.02%) / taker protective exits (0.05%) |
+| 10-15 | Crash-shield SOFT: x=(SDD-ADD)/ADD*100 (reading C, JP-confirmed); g-rate data-anchored per-market: interp(BDD, [p25-of-market-BDDs, 50], [0.05, 1.0]) — ETH p25=8.9 |
 | — | Sim fee 0.0008 = conservative floor; holdout reports taker/maker scenarios; venue = OKX perp sub-account, 1× only |
 
 ## 2. EXPERIMENT LEDGER (major arcs; formulas 001-055 detail in tuner/runs/)

@@ -41,6 +41,10 @@ sweep starts and recorded in the run config.
   summed over crash windows, capped 100.
 - Multiplicative with the law-v2 MDD haircut: final = raw x (1-mdd_frac) x (1-shield_pen%).
 - Reading CONFIRMED by JP 2026-10-15 06:03: relative to allowance (C).
+- g-rate DATA-ANCHORED (JP 2026-10-15 06:18): g = interp(BDD, [p25, 50], [0.05, 1.0])
+  where p25 = 25th percentile of THAT MARKET's own window-BDD distribution
+  (ETH: 8.9%; WARNING per JP: adapts per crypto pair — a market with p25=13
+  uses 13). Computed at runtime, never hardcoded.
 
 ## Total
     score = w_e·excess + w_c·consistency + w_d·down_excess + w_u·up_capture

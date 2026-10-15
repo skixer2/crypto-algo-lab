@@ -127,6 +127,25 @@ def window_metrics(port_eq: pd.Series, bench_close: pd.Series, s, e):
             "dn_mdd": dmdd, "bench_dn_mdd": bdmdd}
 
 
+def bench_bdd_series(bench_close, months):
+    """Per-window bench down-leg MDD -> the market's own noise-floor anchor (JP directive)."""
+    out = []
+    for s, e in months:
+        b = bench_close[(bench_close.index >= s) & (bench_close.index < e)]
+        if len(b) < 2:
+            continue
+        ti = b.idxmin()
+        seg = b[b.index <= ti]
+        out.append(((seg.cummax() - seg) / seg.cummax()).max() * 100 if len(seg) > 1 else 0.0)
+    return np.array(out)
+
+
+def shield_anchor(bench_close, months):
+    """Data-anchored g low point: p25 of window BDDs, capped [3, 20] for sanity."""
+    bdd = bench_bdd_series(bench_close, months)
+    return float(np.clip(np.percentile(bdd[bdd > 0], 25), 3.0, 20.0))
+
+
 def out_penalty_pct(t):  # JP law 2026-10-09 (10% band)
     return 0.0 if (t != t or t <= 10.0) else ((t - 10.0) / 10.0) ** 1.5
 
@@ -135,7 +154,7 @@ def mdd_penalty(mdd):  # JP law v2, 2026-10-14: free <=15%, linear score haircut
     return float(np.clip((mdd - 15.0) / 50.0, 0.0, 1.0))
 
 
-def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=None):
+def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=None, g_anchor=None):
     """weights: dict lane -> np.array(n). pos_mat: (bars, n) internal positions for
     NETTED fee accounting (JP 2026-10-14): fees apply only to changes of the NET
     market exposure sum_i w_i * pos_i — internal-ledger netting, not per-specialist trades."""
@@ -164,13 +183,14 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
     excesses, wm_list = [], []
     worst_mdd = 0.0
 
+    ga = g_anchor if g_anchor else 9.0  # per-market anchor passed by callers; ETH p25 approx
     def _soft_shield(bdd, sdd):
         frac = float(np.interp(bdd, [10.0, 50.0], [0.7, 0.5]))
         allowed = frac * bdd
         if sdd <= allowed or bdd <= 1.0:
             return 0.0
         x_pct = (sdd - allowed) / allowed * 100.0  # JP-confirmed reading (C): relative to allowance
-        g = float(np.interp(bdd, [10.0, 50.0], [0.1, 1.0]))
+        g = float(np.interp(bdd, [ga, 50.0], [0.05, 1.0]))  # data-anchored (JP 2026-10-15)
         return x_pct * g
     for (s, e) in months:
         wv = window_metrics(port_eq, bench_close, s, e)
@@ -227,6 +247,8 @@ def main():
     # monthly windows across the sealed span
     starts = pd.date_range("2021-04-01", "2026-06-01", freq="MS", tz="UTC")
     months = [(s, s + pd.DateOffset(months=1)) for s in starts]
+    GA = shield_anchor(bench["close"], months)
+    print(f"shield g-anchor (p25 of this market's window BDDs): {GA:.1f}%")
 
     import optuna
     optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -266,7 +288,7 @@ def main():
                 w = w / s
             weights[lane_name] = w
         lob_use = lob if lob is not None else lane_of_bar
-        score, det = evaluate(weights, rets, lob_use, bench["close"], months, len(names), pos_mat=POS)
+        score, det = evaluate(weights, rets, lob_use, bench["close"], months, len(names), pos_mat=POS, g_anchor=GA)
         if score == -np.inf:
             TRIAL_LOG.append({"score": -50.0, "vetoed": det, "excesses": None})
             return -50.0  # below any real score, visible-but-vetoed
@@ -305,7 +327,7 @@ def main():
         if s > 1.0:
             w = w / s
         weights[lane_name] = w
-    score, det = evaluate(weights, rets, lob_best, bench["close"], months, len(names), pos_mat=POS)
+    score, det = evaluate(weights, rets, lob_best, bench["close"], months, len(names), pos_mat=POS, g_anchor=GA)
     if score == -np.inf:
         raise SystemExit(f"RECONSTRUCTION VETOED: {det} (should not happen — investigate)")
 
