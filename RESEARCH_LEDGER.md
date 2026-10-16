@@ -72,3 +72,12 @@ Vault (MEMORY.md/HEARTBEAT.md) carries pointers, not details.
 
 ### 2026-10-16 18:19 UTC — SEAL SEQUENCE DECIDED (JP): seal AFTER the independent review
 - v2.1g seal waits for the DeepSeek V4 Pro adversarial review (subagent ds-v4pro-audit, running) — and implicitly the last 5 knob-jitter readouts. Any CRITICAL finding from either blocks the seal until resolved; clean review -> seal executes without further debate.
+
+### 2026-10-16 19:0x UTC — 🚨 CRITICAL: BLEND-LAYER LOOKAHOOK — SEAL BLOCKED — blend program quarantined
+- DS V4 Pro review (reports/deepseek_v4pro_review_20261016.md) found, and I INDEPENDENTLY VERIFIED (tuner/runs/lookahead_verify_v21g.json): blender.py evaluate() pairs lane[t] (computed from close[t]) with ret[t] (move ending at close[t]) = one-bar lookahead.
+- My reproduction, ETH v2.1g, same weights/curves/months: AS-SHIPPED +7.33%/mo (t +2.96, FTX +22.2) -> HONEST pairing wl[t-1]*ret[t]: **-5.29%/mo (t -2.46, FTX +2.6), negative 4/6 years**. Flip-bar rent: +12.5 pts/mo = 170% of the shipped edge, from 3.75% of bars. (Reviewer's secondary conditional P=0.77 not reproduced by my conditioning — non-load-bearing; the pairing-shift test is decisive and agrees exactly.)
+- CONTAMINATED (quarantined, do not quote): every blend-level number from this evaluate() — v2.1g ETH/SOL/BTC + transplants + funding-at-portfolio overlays, v1b champion (+4.64), all Optuna blend searches. STANDS: data pipeline (reviewer: clean, 0 dup stamps, seal held), specialist engine sims (except CRITICAL-2 pending), engine-level honesty stack, today's fee-bug correction methodology.
+- CRITICAL-2 (pending my verification): simulation.py:162 feeds 1h open-stamped bias bars up to 60 min early (alpha_056/032/004, use_bias_filter).
+- WARNs: rails DD distribution missing worst episode (full-span max 20.46% Jan-2021 vs 19.5 documented); t=2.96 = best-of-5000x48 in-sample; July 2026 in-seal unreported month: excess -9.4 in +18% bull month; alpha_028 never trades yet w=0.18.
+- P0 (endorsed): (1) shift blend pairing one bar, regenerate everything; (2) re-run blender search under honest objective (vectorized, cheap); (3) fix 1h early feed + re-sim 3 specialists; (4) PERMANENT GUARDS: flip-bar-rent <25% monitor + one-bar relabel-invariance test in evaluate(); (5) commit ephemeral overlay/compose scripts.
+- JP rule honored: CRITICAL blocks seal. Seal OFF until honest-pairing champion exists (if one does).
