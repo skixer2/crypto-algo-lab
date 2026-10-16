@@ -1,0 +1,13 @@
+{
+ "market": "BTC",
+ "month": "2022-11",
+ "alpha": "alpha_035",
+ "contrib": 29.797060758182266,
+ "spec_month_arith": 12.407349407106894,
+ "detail": {
+  "weight_mean": 0.2053,
+  "contribution_pct": 29.797,
+  "spec_month_arith_pct": 12.41,
+  "spec_month_comp_pct": 11.37
+ }
+}

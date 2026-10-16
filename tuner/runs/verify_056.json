@@ -1,0 +1,59 @@
+{
+ "status": "ok",
+ "chunks": [
+  {
+   "chunk": "2021",
+   "window": [
+    "2021-01-01T00:00:00+00:00",
+    "2022-01-01T00:00:00+00:00"
+   ],
+   "direct_growth": 3.012419,
+   "stored_growth": 2.896311,
+   "rel_divergence_pct": 4.0088
+  },
+  {
+   "chunk": "2022",
+   "window": [
+    "2022-01-01T00:00:00+00:00",
+    "2023-01-01T00:00:00+00:00"
+   ],
+   "direct_growth": 0.873562,
+   "stored_growth": 0.91621,
+   "rel_divergence_pct": 4.6549
+  },
+  {
+   "chunk": "2023",
+   "window": [
+    "2023-01-01T00:00:00+00:00",
+    "2024-01-01T00:00:00+00:00"
+   ],
+   "direct_growth": 1.075396,
+   "stored_growth": 1.047382,
+   "rel_divergence_pct": 2.6747
+  },
+  {
+   "chunk": "2024",
+   "window": [
+    "2024-01-01T00:00:00+00:00",
+    "2025-01-01T00:00:00+00:00"
+   ],
+   "direct_growth": 1.236635,
+   "stored_growth": 1.184713,
+   "rel_divergence_pct": 4.3827
+  },
+  {
+   "chunk": "2025H1",
+   "window": [
+    "2025-01-01T00:00:00+00:00",
+    "2026-07-28T00:00:00+00:00"
+   ],
+   "direct_growth": 0.902762,
+   "stored_growth": 0.857539,
+   "rel_divergence_pct": 5.2736
+  }
+ ],
+ "chained_direct_final_equity": 31593.11,
+ "chained_stored_final_equity": 28236.6,
+ "chained_rel_divergence_pct": 11.8871,
+ "max_per_chunk_rel_divergence_pct": 5.2736
+}

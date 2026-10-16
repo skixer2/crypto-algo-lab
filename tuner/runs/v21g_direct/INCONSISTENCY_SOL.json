@@ -1,0 +1,13 @@
+{
+ "market": "SOL",
+ "month": "2022-11",
+ "alpha": "alpha_035",
+ "contrib": 127.92003818308079,
+ "spec_month_arith": 95.8071608535942,
+ "detail": {
+  "weight_mean": 0.2887,
+  "contribution_pct": 127.92,
+  "spec_month_arith_pct": 95.81,
+  "spec_month_comp_pct": 108.05
+ }
+}
