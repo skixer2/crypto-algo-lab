@@ -58,3 +58,9 @@ Vault (MEMORY.md/HEARTBEAT.md) carries pointers, not details.
 - The "+13.7/+2.5 vs +20.6/+9.4" gap was NOT fast-vs-direct: fast transfers ran v2.1e+det12 (artifact Oct 15 06:33, subtitle self-identifies "v2.1e on BTC... detector-12... +2.45%"); direct rebuild = v2.1g+det7 (born 07:03). Two different champions compared as one. Transfer-gate "inconclusive" verdict RETRACTED — v2.1g cross-asset: SOL +20.60, BTC +9.37 (construction-verified).
 - Standalone 035 on SOL: equity → 0.0x (short-squeeze chain-stop); routed portfolio unaffected — router is load-bearing on foreign assets.
 - RULE (named, 5th instance of comparing-different-things): STATE THE CANDIDATE'S IDENTITY (weights file + detector + fee model) BEFORE comparing any two numbers.
+
+### 2026-10-16 (PM) — CORRECTION: transplant numbers were fee-free; honest netted numbers shipped
+- Root cause found (my bug, not the auditor's): direct compose string-mapped {"long","short"} onto NUMERIC position columns in auditor CSVs -> all positions 0 -> zero netted fees. Yesterday's "+20.6 SOL / +9.4 BTC" were FEE-FREE. Morning "v21e-vs-v21g identity" attribution also incomplete: the dominant term was the missing fee, not version identity.
+- Canonical verify: my compose reproduces official ETH v2.1g via stored curves under the netted law (gate tol 0.15). Stored weights are 3dp-rounded (vol_compressed sums 1.001 -> evaluate() -inf on re-run; gate uses compose arithmetic).
+- HONEST v2.1g cross-asset (netted, both paths agree): see tuner/runs/v21g_transplant_CORRECTED.json; graphs v21g_{SOL,BTC}_direct.html regenerated with fee-drag + turnover in subtitle.
+- Rule: assert position parse coverage >0 before composing (zero-exposure portfolio impossible); compose via canonical evaluate() formula only.

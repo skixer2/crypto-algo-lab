@@ -1,0 +1,44 @@
+{
+ "eth_reproduction": {
+  "mine": 7.3311,
+  "official": 7.3294367252334425,
+  "tolerance": 0.15
+ },
+ "corrected": {
+  "SOL": {
+   "netted_mean_exc": 13.87,
+   "feefree_mean_exc": 20.79,
+   "fee_drag_pts": 6.92,
+   "netted_final_x": 543212.0,
+   "netted_gm_pct": 23.3,
+   "ftx_strat_pct": 202.9,
+   "turnover_net_flips_per_mo": 66.8
+  },
+  "BTC": {
+   "netted_mean_exc": 4.25,
+   "feefree_mean_exc": 9.55,
+   "fee_drag_pts": 5.29,
+   "netted_final_x": 28.0,
+   "netted_gm_pct": 5.4,
+   "ftx_strat_pct": 27.9,
+   "turnover_net_flips_per_mo": 59.0
+  }
+ },
+ "law": "netted fees on Delta(sum w*pos) 0.0008 (JP 2026-10-14) \u2014 bug was string-map onto numeric positions in my direct compose (zero fees)",
+ "fast_path_crosscheck": {
+  "SOL": {
+   "fast_mean_excess": 13.71,
+   "direct_mean_excess": 20.6,
+   "delta_pts": -6.89,
+   "fast_gm_pct": 19.2,
+   "fast_final_x": 77915.0
+  },
+  "BTC": {
+   "fast_mean_excess": 4.11,
+   "direct_mean_excess": 9.37,
+   "delta_pts": -5.26,
+   "fast_gm_pct": 5.1,
+   "fast_final_x": 24.0
+  }
+ }
+}
