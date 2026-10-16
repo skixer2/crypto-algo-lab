@@ -1,0 +1,38 @@
+{
+ "ETH": {
+  "mean_exc_by_bp": {
+   "0": 7.33,
+   "2": 6.04,
+   "5": 4.14,
+   "10": 1.04,
+   "20": -4.88,
+   "30": -10.43
+  },
+  "breakeven_extra_bp_per_side": 11.8,
+  "turnover_flips_per_mo": 57.8
+ },
+ "SOL": {
+  "mean_exc_by_bp": {
+   "0": 13.87,
+   "2": 12.21,
+   "5": 9.75,
+   "10": 5.77,
+   "20": -1.76,
+   "30": -8.77
+  },
+  "breakeven_extra_bp_per_side": 17.7,
+  "turnover_flips_per_mo": 66.8
+ },
+ "BTC": {
+  "mean_exc_by_bp": {
+   "0": 4.25,
+   "2": 2.97,
+   "5": 1.08,
+   "10": -1.99,
+   "20": -7.85,
+   "30": -13.34
+  },
+  "breakeven_extra_bp_per_side": 6.8,
+  "turnover_flips_per_mo": 59.0
+ }
+}
