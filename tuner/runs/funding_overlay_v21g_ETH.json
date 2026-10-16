@@ -1,0 +1,16 @@
+{
+ "proxy": "binance ETHUSDT um perp (cross-venue proxy for OKX)",
+ "eth_netted": 7.33,
+ "eth_netted_plus_funding": 7.01,
+ "drag_pts_mo": 0.33,
+ "by_year_pct": {
+  "2021": 19.1,
+  "2022": 1.1,
+  "2023": 3.2,
+  "2024": 4.6,
+  "2025": 1.7,
+  "2026": 0.5
+ },
+ "ftx_month_pct": 0.2,
+ "cost_share_pct": 89.0
+}
