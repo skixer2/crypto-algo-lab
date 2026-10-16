@@ -1,0 +1,16 @@
+{
+ "SOL": {
+  "fast_mean_excess": 13.71,
+  "direct_mean_excess": 20.6,
+  "delta_pts": -6.89,
+  "fast_gm_pct": 19.2,
+  "fast_final_x": 77915.0
+ },
+ "BTC": {
+  "fast_mean_excess": 4.11,
+  "direct_mean_excess": 9.37,
+  "delta_pts": -5.26,
+  "fast_gm_pct": 5.1,
+  "fast_final_x": 24.0
+ }
+}

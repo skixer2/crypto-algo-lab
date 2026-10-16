@@ -1,0 +1,117 @@
+{
+ "generated": "2026-10-16",
+ "question": "per-specialist fast-vs-direct divergence (v2.1g pool)",
+ "SOL": {
+  "alpha_004": [
+   1.1,
+   1.1,
+   0.0,
+   null
+  ],
+  "alpha_024": [
+   2.0,
+   2.0,
+   0.0,
+   null
+  ],
+  "alpha_027": [
+   20.4,
+   20.4,
+   0.0,
+   null
+  ],
+  "alpha_028": [
+   1.0,
+   1.0,
+   0.0,
+   null
+  ],
+  "alpha_032": [
+   1.2,
+   1.0,
+   17.8,
+   "2021-02-18"
+  ],
+  "alpha_035": [
+   0.0,
+   0.0,
+   0.0,
+   null
+  ],
+  "alpha_048": [
+   1.8,
+   1.8,
+   0.0,
+   null
+  ],
+  "alpha_050": [
+   37.8,
+   37.8,
+   0.0,
+   null
+  ],
+  "alpha_056": [
+   22.9,
+   23.6,
+   2.8,
+   "2021-03-13"
+  ]
+ },
+ "BTC": {
+  "alpha_004": [
+   1.0,
+   1.0,
+   0.0,
+   null
+  ],
+  "alpha_024": [
+   1.3,
+   1.3,
+   0.0,
+   null
+  ],
+  "alpha_027": [
+   1.2,
+   1.2,
+   0.0,
+   null
+  ],
+  "alpha_028": [
+   1.0,
+   1.0,
+   0.0,
+   null
+  ],
+  "alpha_032": [
+   1.4,
+   1.4,
+   0.0,
+   null
+  ],
+  "alpha_035": [
+   0.1,
+   0.1,
+   0.0,
+   null
+  ],
+  "alpha_048": [
+   0.8,
+   0.8,
+   0.0,
+   null
+  ],
+  "alpha_050": [
+   0.9,
+   0.9,
+   0.0,
+   null
+  ],
+  "alpha_056": [
+   1.2,
+   1.2,
+   1.5,
+   "2021-01-30"
+  ]
+ },
+ "note": "[direct_x, fast_x, total_return_divergence_pct, first_divergence_date]"
+}

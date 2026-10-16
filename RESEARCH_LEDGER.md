@@ -52,3 +52,9 @@ Vault (MEMORY.md/HEARTBEAT.md) carries pointers, not details.
 **Long:** NN regime classifier trained (skill labels + macro columns + news features) · cross-sectional features (dominance/relative-strength) · BTC book · live deployment path (paper 2-4wk → sub-account 1×)
 
 **Standing checkpoints:** Oct ~25 bull-seat/seal revisit · Gemini reviews only at contested designs (next: post-v2.1 if forks emerge)
+
+### 2026-10-16 — fast-vs-direct CLOSED; transfer comparison error attributed (v21e≠v21g)
+- Per-specialist ranking: fast=direct 0.0% for 15/18 curves; SOL 032 17.8% (2021-02-18), SOL 056 2.8%, BTC 056 1.5% (head-edge). Portfolio artifacts: tuner/runs/chaos_ranking.json, tuner/runs/v21g_fast_vs_direct_portfolio.json.
+- The "+13.7/+2.5 vs +20.6/+9.4" gap was NOT fast-vs-direct: fast transfers ran v2.1e+det12 (artifact Oct 15 06:33, subtitle self-identifies "v2.1e on BTC... detector-12... +2.45%"); direct rebuild = v2.1g+det7 (born 07:03). Two different champions compared as one. Transfer-gate "inconclusive" verdict RETRACTED — v2.1g cross-asset: SOL +20.60, BTC +9.37 (construction-verified).
+- Standalone 035 on SOL: equity → 0.0x (short-squeeze chain-stop); routed portfolio unaffected — router is load-bearing on foreign assets.
+- RULE (named, 5th instance of comparing-different-things): STATE THE CANDIDATE'S IDENTITY (weights file + detector + fee model) BEFORE comparing any two numbers.
