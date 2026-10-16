@@ -1,0 +1,33 @@
+{
+ "proxy": "binance cross-venue",
+ "SOL": {
+  "netted": 13.87,
+  "netted_plus_funding": 13.28,
+  "drag_pts_mo": 0.59,
+  "by_year_pct": {
+   "2021": 14.0,
+   "2022": 8.5,
+   "2023": 0.2,
+   "2024": 4.8,
+   "2025": 1.4,
+   "2026": 1.2
+  },
+  "ftx_month_pct": 6.0,
+  "cost_share_pct": 77.0
+ },
+ "BTC": {
+  "netted": 4.25,
+  "netted_plus_funding": 4.0,
+  "drag_pts_mo": 0.25,
+  "by_year_pct": {
+   "2021": 13.2,
+   "2022": 1.1,
+   "2023": 3.1,
+   "2024": 4.9,
+   "2025": 1.3,
+   "2026": 0.0
+  },
+  "ftx_month_pct": 0.1,
+  "cost_share_pct": 85.0
+ }
+}
