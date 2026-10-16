@@ -64,3 +64,8 @@ Vault (MEMORY.md/HEARTBEAT.md) carries pointers, not details.
 - Canonical verify: my compose reproduces official ETH v2.1g via stored curves under the netted law (gate tol 0.15). Stored weights are 3dp-rounded (vol_compressed sums 1.001 -> evaluate() -inf on re-run; gate uses compose arithmetic).
 - HONEST v2.1g cross-asset (netted, both paths agree): see tuner/runs/v21g_transplant_CORRECTED.json; graphs v21g_{SOL,BTC}_direct.html regenerated with fee-drag + turnover in subtitle.
 - Rule: assert position parse coverage >0 before composing (zero-exposure portfolio impossible); compose via canonical evaluate() formula only.
+
+### 2026-10-16 (PM) — LIVE RISK RAILS v0 — **PROVISIONAL: TO BE CONFIRMED ON THE FIELD** (JP, 15:02 UTC)
+- Design (JP-approved direction, soft-law mirrored in live): de-risk rail 20% continuous DD (halve exposure, alert) · kill-switch 25% (flatten + review; restart = JP decision only) · slow-bleed alarm on rolling-quarter excess vs bench (threshold = worst backtest rolling quarter; exact value to be computed in execution spec). Measured on LIVE account equity incl. fees+funding actually paid.
+- Basis: continuous DD distribution 2021-2026 (132 episodes >=3%: median 4.6%, p90 11%, max 19.5%; top-4 cluster 18.7-19.5%, recoveries 1-33 d). CRITICAL: the 15.0% champion stat is the WINDOWED (calendar-month) fitness metric — live rails must NEVER anchor on it (15x1.2=18% would have whipsawed 4x in production).
+- **STATUS: FIELD-UNVERIFIED — hypothesis from backtest distribution only.** Paper-live pilot must confirm: no-whipsaw on real books, trigger mechanics, slow-bleed calibration. Promotion to standing doctrine only after pilot review. OWNER: JP confirm; ZioClaw instrument.
