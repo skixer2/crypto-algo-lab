@@ -81,3 +81,9 @@ Vault (MEMORY.md/HEARTBEAT.md) carries pointers, not details.
 - WARNs: rails DD distribution missing worst episode (full-span max 20.46% Jan-2021 vs 19.5 documented); t=2.96 = best-of-5000x48 in-sample; July 2026 in-seal unreported month: excess -9.4 in +18% bull month; alpha_028 never trades yet w=0.18.
 - P0 (endorsed): (1) shift blend pairing one bar, regenerate everything; (2) re-run blender search under honest objective (vectorized, cheap); (3) fix 1h early feed + re-sim 3 specialists; (4) PERMANENT GUARDS: flip-bar-rent <25% monitor + one-bar relabel-invariance test in evaluate(); (5) commit ephemeral overlay/compose scripts.
 - JP rule honored: CRITICAL blocks seal. Seal OFF until honest-pairing champion exists (if one does).
+
+### 2026-10-17 09:06 UTC — STANDING LAW (JP): THE REAL-ACCOUNT FEE MODEL = netted-only
+- JP's confirmed execution model, verbatim example: Alpha1 buys 100 (→pos 150), AlphaB sells 50 (→pos 100); crossing portions net internally; exchange sees ONE order +50; fee = |50| x rate. General law: fee = |desired net - current net| x rate = |Delta(Sigma w_i pos_i)| x 0.0008, per bar.
+- DECREE (JP, permanent goal "the code that approaches the real result the most"): specialist curves must be FEE-FREE; the ONLY fee is the netted layer. Layer A (per-specialist embedded fees) = internal ledger fiction, never charged twice again.
+- Rebuild wave (after in-flight honest search delivers): fee=0 re-sims + next-open fills + intrabar SL/TP (WARN-5, same wave, one re-simulation) -> honest search re-run under real-account model -> walk-forward gates.
+- JP's paradox resolved + recorded: netting never increases a GIVEN trade's cost (B<=A per event), but B's event set includes lane-boundary weight swaps (A models none); as-built churn ~60 net-units/mo was lookahead-selected pathology.
