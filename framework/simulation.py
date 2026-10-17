@@ -154,12 +154,17 @@ class SimulationEngine:
         for ts, row in exec_df.iterrows():
             price = float(row["close"])
 
-            # Feed bias TF candles up to current execution timestamp
+            # Feed bias TF candles whose bar has CLOSED by this exec bar's close
+            # (CRITICAL-2 fix, 2026-10-16): OKX candles are open-stamped — a 1h bar
+            # stamped h closes at h+1h; only then may the model see its final OHLC.
+            # Exec bar stamped ts closes at ts+exec_delta. Same-TF feeds unchanged.
+            exec_close = ts + pd.Timedelta(execution_tf)
             for tf in bias_tfs:
                 ts_list = timestamps[tf]
                 bdf = dfs[tf]
+                tf_close = pd.Timedelta(tf)
                 idx = bias_idxs[tf]
-                while idx < len(ts_list) and ts_list[idx] <= ts:
+                while idx < len(ts_list) and ts_list[idx] + tf_close <= exec_close:
                     self.model.update(bdf.loc[ts_list[idx]], tf)
                     idx += 1
                 bias_idxs[tf] = idx
