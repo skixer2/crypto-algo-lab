@@ -154,10 +154,14 @@ def mdd_penalty(mdd):  # JP law v2, 2026-10-14: free <=15%, linear score haircut
     return float(np.clip((mdd - 15.0) / 50.0, 0.0, 1.0))
 
 
-def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=None, g_anchor=None):
+def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=None, g_anchor=None, shift=1):
     """weights: dict lane -> np.array(n). pos_mat: (bars, n) internal positions for
     NETTED fee accounting (JP 2026-10-14): fees apply only to changes of the NET
-    market exposure sum_i w_i * pos_i — internal-ledger netting, not per-specialist trades."""
+    market exposure sum_i w_i * pos_i — internal-ledger netting, not per-specialist trades.
+    shift=1 is HONEST pairing (CRITICAL-1 fix, 2026-10-16): lane label at bar t is
+    computed from close[t], so it may only act on returns from bar t+1 onward —
+    weights applied to rets[t] are those decided on information through close[t-1].
+    shift=0 reproduces the ORIGINAL LOOKAHEAD pairing (forensic use ONLY)."""
     W = np.zeros((len(LANES), n_specialists))
     for li, lane in enumerate(LANES):
         if lane in weights:
@@ -166,11 +170,16 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
     for li in range(len(LANES)):
         if np.abs(W[li]).sum() > 1.0 + 1e-9:
             return -np.inf, "lane exposure >1"
+    if pos_mat is not None and float(pos_mat.to_numpy().__abs__().sum()) == 0.0:
+        raise AssertionError("position coverage zero — parse bug class (2026-10-16): "
+                             "a zero-exposure portfolio is impossible over a full span")
     wl = np.zeros((len(rets), n_specialists))
     lob = lane_of_bar if str(lane_of_bar.dtype).startswith("int") else None
     for li, lane in enumerate(LANES):
         mask = (lane_of_bar == li) if lob is not None else (lane_of_bar == lane)
         wl[mask] = W[li]
+    if shift > 0:  # HONEST pairing: labels lag by `shift` bars before touching returns
+        wl = np.vstack([wl[:shift], wl[:-shift]])
     w_ret = (wl * rets.to_numpy()).sum(axis=1)
     if pos_mat is not None:
         net_expo = (wl * pos_mat.to_numpy()).sum(axis=1)
@@ -228,6 +237,29 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
     return score, {"mean_excess": mean_exc, "t": t_stat, "seg_dn": seg_dn, "seg_up": seg_up,
                    "run_mdd": run_mdd, "time_out": time_out, "active": active,
                    "windows": wm_list}
+
+
+def flip_rent(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat, g_anchor):
+    """CRITICAL-1 guard: how much of the edge is SAME-BAR label rent (lookahead value)?
+    Compares mean excess under shift=0 (act on the label the instant it exists — illegal)
+    vs shift=1 (honest). If >25% of the edge vanishes... no: if >25% of the shift0 edge
+    IS the rent, the candidate is lookahead-flattered -> ALARM. Run on every winner."""
+    s0 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=0)[1]["mean_excess"]
+    s1 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=1)[1]["mean_excess"]
+    share = (s0 - s1) / s0 if abs(s0) > 1e-9 else 0.0
+    return {"edge_if_samebar": round(s0, 2), "edge_honest": round(s1, 2),
+            "rent_share_pct": round(share * 100, 1), "alarm": bool(share > 0.25)}
+
+
+def relabel_invariance(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat, g_anchor):
+    """CRITICAL-1 guard: does the edge survive acting one bar LATER than assumed?
+    shift=1 vs shift=2. A real edge decays gently; a timing illusion collapses.
+    Retention < 0.25 -> ALARM (edge lives on a knife-edge of execution speed)."""
+    s1 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=1)[1]["mean_excess"]
+    s2 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=2)[1]["mean_excess"]
+    retention = (s2 / s1) if s1 > 1e-9 else 0.0
+    return {"edge_shift1": round(s1, 2), "edge_shift2": round(s2, 2),
+            "retention": round(retention, 3), "alarm": bool(retention < 0.25)}
 
 
 def main():
@@ -331,10 +363,22 @@ def main():
     if score == -np.inf:
         raise SystemExit(f"RECONSTRUCTION VETOED: {det} (should not happen — investigate)")
 
+    # HONESTY GATES on the winner (CRITICAL-1 guards, 2026-10-16) + July partial disclosure
+    fr = flip_rent(weights, rets, lob_best, bench["close"], months, len(names), POS, GA)
+    ri = relabel_invariance(weights, rets, lob_best, bench["close"], months, len(names), POS, GA)
+    july = evaluate(weights, rets, lob_best, bench["close"],
+                    [(pd.Timestamp("2026-07-01", tz="UTC"), pd.Timestamp("2026-07-28", tz="UTC"))],
+                    len(names), pos_mat=POS, g_anchor=GA)[1]["mean_excess"]
+    print(f"HONESTY | flip-rent share {fr['rent_share_pct']}% (alarm >25%: {fr['alarm']}) | "
+          f"relabel retention {ri['retention']} (alarm <0.25: {ri['alarm']}) | "
+          f"July-2026 partial excess {july:+.2f}%")
+
     out = {"label": args.label, "detector": int(best_det), "score": round(score, 3),
            "weights": {ln: {nm: round(float(w[i]), 3) for i, nm in enumerate(names) if abs(w[i]) > 0.02}
                         for ln, w in weights.items()},
            "details": {k: v for k, v in det.items() if k != "windows"},
+           "honesty": {"flip_rent": fr, "relabel_invariance": ri,
+                       "july26_partial_excess": round(july, 2)},
            "windows": [{"month": str(s.date()), **{k: (round(v, 2) if isinstance(v, float) else v)
                      for k, v in w.items()}} for (s, e), w in zip(months, det["windows"])]}
     json.dump(TRIAL_LOG, open(os.path.join(REPO, "tuner", "runs", f"{args.label}_trials.json"), "w"))
