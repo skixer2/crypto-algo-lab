@@ -239,11 +239,17 @@ def evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos
                    "windows": wm_list}
 
 
+def _renorm(weights):
+    """3dp-stored JSONs can sum >1 (vol_compressed 1.001): scale lanes back under the cap."""
+    return {ln: (np.asarray(w, dtype=float) / max(1.0, float(np.abs(w).sum()))) for ln, w in weights.items()}
+
+
 def flip_rent(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat, g_anchor):
     """CRITICAL-1 guard: how much of the edge is SAME-BAR label rent (lookahead value)?
     Compares mean excess under shift=0 (act on the label the instant it exists — illegal)
-    vs shift=1 (honest). If >25% of the edge vanishes... no: if >25% of the shift0 edge
-    IS the rent, the candidate is lookahead-flattered -> ALARM. Run on every winner."""
+    vs shift=1 (honest). If >25% of the shift0 edge IS the rent -> ALARM (foresight smell
+    under buggy timing; concentration fragility under honest timing). Run on every winner."""
+    weights = _renorm(weights)
     s0 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=0)[1]["mean_excess"]
     s1 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=1)[1]["mean_excess"]
     share = (s0 - s1) / s0 if abs(s0) > 1e-9 else 0.0
@@ -255,6 +261,7 @@ def relabel_invariance(weights, rets, lane_of_bar, bench_close, months, n_specia
     """CRITICAL-1 guard: does the edge survive acting one bar LATER than assumed?
     shift=1 vs shift=2. A real edge decays gently; a timing illusion collapses.
     Retention < 0.25 -> ALARM (edge lives on a knife-edge of execution speed)."""
+    weights = _renorm(weights)
     s1 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=1)[1]["mean_excess"]
     s2 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=2)[1]["mean_excess"]
     retention = (s2 / s1) if s1 > 1e-9 else 0.0

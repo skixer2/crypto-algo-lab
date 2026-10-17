@@ -20,7 +20,7 @@ import numpy as np, pandas as pd
 from tools.blender import LANES, evaluate, flip_rent, relabel_invariance
 from tools.regime_grid import regime_array
 
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 FEE = 0.0008
 
 
@@ -64,6 +64,10 @@ def main():
         for nm, w in wm.items():
             if nm in nl:
                 W[LANES.index(ln)][nl.index(nm)] = w
+    for li in range(4):  # 3dp rounding can push sums >1 — renormalize at the choke point
+        s = float(np.abs(W[li]).sum())
+        if s > 1.0:
+            W[li] = W[li] / s
     warr = {LANES[li]: W[li] for li in range(4)}
 
     months = [(pd.Timestamp("2021-04-01", tz="UTC") + pd.DateOffset(months=k),
