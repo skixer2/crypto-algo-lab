@@ -15,7 +15,7 @@ Usage:
       [--funding framework/data_cache/binance_ETHUSDT_funding_proxy_202101_202610.csv]
 """
 import argparse, json, os, sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import numpy as np, pandas as pd
 from tools.blender import LANES, evaluate, flip_rent, relabel_invariance
 from tools.regime_grid import regime_array
@@ -82,8 +82,6 @@ def main():
         wl = np.vstack([wl[:1], wl[:-1]])
         net = (wl * po[nl].to_numpy()).sum(axis=1)
         fc = np.where((cu.index.hour % 8 == 0) & (cu.index.minute == 0), fr * net, 0.0)
-        sc_f, det_f = evaluate(warr, rets - 0, lanes, bench["close"], months, len(nl), pos_mat=po[nl], g_anchor=ga, shift=1)
-        # recompute with funding by direct composition (evaluate has no funding hook yet)
         pr = (wl * rets.to_numpy()).sum(axis=1) - FEE * np.abs(np.diff(net, prepend=0.0)) - fc
         port = pd.Series(np.cumprod(1 + pr), index=cu.index)
         excs = []
