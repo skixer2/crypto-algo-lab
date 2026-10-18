@@ -97,3 +97,8 @@ Vault (MEMORY.md/HEARTBEAT.md) carries pointers, not details.
 - Blender verdict: lane-routing = defense-only frame; continuous blend rejected; online gating premature; ADOPT blend-level volatility-target overlay to enforce MDD law mechanically.
 - BUILD ORDER (endorsed): rebuild wave (fee-free + next-open fills + two-level stops per JP doctrine 09:36) -> alpha_070 gated latch -> blend v3-honest (walk-forward weights + funding gate + vol-target) -> deepen offensive pool -> online gating / NN skill-labels last.
 - CoinGlass decision now evidence-backed: funding conditioning was the largest single honest improvement found to date.
+
+### 2026-10-18 20:15 UTC — CoinGlass DECISION CLOSED (JP): no tier fits; overlap measurement replaces it
+- Pricing page (JP read): funding-history depth 180d (Hobbyist/Startup) / 360d (Standard) / 720d (Professional) — cannot reach 2021 at any price. NO SUBSCRIPTION. Pending item from 2026-10-13 closed.
+- Overlap measurement (native OKX recorder vs Binance proxy, 126 settlements 2026-07-14..09-30): corr 0.497 (quiet-funding window, noise-dominated near zero), sign agreement 81.7%, mean |diff| 0.00288%/8h.
+- Consequences: (a) historical COST overlays carry ~±0.26 pts/mo proxy error on 1x — bounded, acceptable; (b) GATE conditioning (30d pctl < 0.7) agrees only 69.8% at settlement level — registered as a model-risk item on the latch (076) entry exam: mitigate via gate-plateau robustness (holds 0.5-0.8) + entry-moment relevance + re-validation as native OKX history accumulates (recorder running; 12mo -> full native re-validation possible).
