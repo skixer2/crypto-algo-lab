@@ -73,8 +73,10 @@ def main():
             ctx_cache[f] = prepare_fast_context(CSV["15m"], CSV["1h"], f)
         t0 = time.time()
         p = WQAlphaParams(formula_path=f, **params)
+        # FEE-FREE curves (JP 2026-10-17 standing law): the ONLY fee is the
+        # blend-level netted layer (blender.py FEE on |Delta net exposure|).
         eq = run_backtest(p, "ETH/USDT", "15m", "1h", CSV, START, END,
-                          ctx=ctx_cache[f], allow_shorts=True, fee=0.0008)
+                          ctx=ctx_cache[f], allow_shorts=True, fee=0.0)
         if eq is None:
             print(f"[{f}] sim FAILED", flush=True)
             continue

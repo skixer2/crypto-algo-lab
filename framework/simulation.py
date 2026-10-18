@@ -87,6 +87,7 @@ class SimulationEngine:
         self.cash: float = initial_capital
         self.crypto_qty: float = 0.0
         self.position: Optional[str] = None   # "long" | "short" | None
+        self._pending = None  # pending order decided at close, filled at NEXT bar's open (JP doctrine 2026-10-18)
         self.entry_price: float = 0.0
         self.stop_loss: float = 0.0
         self.take_profit: float = 0.0
@@ -153,6 +154,7 @@ class SimulationEngine:
         # ── Main tick loop ───────────────────────────────────────
         for ts, row in exec_df.iterrows():
             price = float(row["close"])
+            price_open = float(row["open"])
 
             # Feed bias TF candles whose bar has CLOSED by this exec bar's close
             # (CRITICAL-2 fix, 2026-10-16): OKX candles are open-stamped — a 1h bar
@@ -172,6 +174,29 @@ class SimulationEngine:
             # Feed execution TF candle
             self.model.update(row, execution_tf)
 
+            # ── Step 0a: fill PENDING orders at THIS bar's open (decided at the
+            # previous close; live reality = order ~1s after the close, first
+            # tradeable price = this bar's open). JP doctrine 2026-10-18.
+            if self._pending is not None:
+                p = self._pending
+                self._pending = None
+                if p["kind"] == "enter" and self.position is None:
+                    self._do_enter(p["direction"], price_open, p["size_pct"], ts, p["sl"], p["tp"])
+                elif p["kind"] == "exit" and self.position is not None:
+                    self._do_exit(price_open, ts, p["reason"])
+
+            # ── Step 0b: CATASTROPHIC intrabar stop — 2x the close-based stop
+            # distance, checked on the bar's extremes, gap-aware fill (JP 2026-10-18:
+            # close values govern normal operation; intrabar = disaster insurance only).
+            if self.position is not None and self.entry_price:
+                cat = 2.0 * self.stop_loss - self.entry_price  # long: EP-2d, short: EP+2d
+                if self.position == "long":
+                    if float(row["low"]) <= cat:
+                        self._do_exit(min(price_open, cat), ts, "stop_loss_intrabar")
+                else:
+                    if float(row["high"]) >= cat:
+                        self._do_exit(max(price_open, cat), ts, "stop_loss_intrabar")
+
             # ── Step 1: Check exit conditions if in position ──────
             # exited_this_tick gates Step 2 so an exit and a fresh entry never
             # share the same candle close (unless allow_same_tick_reversal).
@@ -183,23 +208,23 @@ class SimulationEngine:
                 # logic (audit R3-B, Gemini round 2, accepted).
                 if self.position == "long":
                     if price <= self.stop_loss:
-                        self._do_exit(price, ts, "stop_loss")
+                        self._queue_exit("stop_loss")
                         exited_this_tick = True
                     elif price >= self.take_profit:
-                        self._do_exit(price, ts, "take_profit")
+                        self._queue_exit("take_profit")
                         exited_this_tick = True
                 elif self.position == "short":
                     if price >= self.stop_loss:
-                        self._do_exit(price, ts, "stop_loss")
+                        self._queue_exit("stop_loss")
                         exited_this_tick = True
                     elif price <= self.take_profit:
-                        self._do_exit(price, ts, "take_profit")
+                        self._queue_exit("take_profit")
                         exited_this_tick = True
                 # Model-managed exit SECOND (structural/rule-based exits).
                 if not exited_this_tick and hasattr(self.model, "manage_position"):
                     reason = self.model.manage_position(self.position, price, ts)
                     if reason:
-                        self._do_exit(price, ts, f"model_exit:{reason}")
+                        self._queue_exit(f"model_exit:{reason}")
                         exited_this_tick = True
 
             # ── Step 2: Check for new entry signal ────────────────
@@ -213,7 +238,7 @@ class SimulationEngine:
                     sl = indicators.get("stop_loss", 0.0)
                     tp = indicators.get("take_profit", 0.0)
                     if sl > 0 and tp > 0:
-                        self._do_enter(action, price, size_pct, ts, sl, tp)
+                        self._queue_enter(action, size_pct, sl, tp)
 
             # ── Step 3: Record ────────────────────────────────────
             eq = self._eq(price)
@@ -235,6 +260,18 @@ class SimulationEngine:
         return self._build_result()
 
     # ── Trade execution ──────────────────────────────────────────────
+
+    def _queue_exit(self, reason: str) -> None:
+        """Queue an exit decided at this close; fills at the next bar's open."""
+        if self._pending is None:
+            self._pending = {"kind": "exit", "reason": reason}
+
+    def _queue_enter(self, direction: str, size_pct: float, sl: float, tp: float) -> None:
+        """Queue an entry decided at this close; fills at the next bar's open."""
+        if self._pending is None:
+            self._pending = {"kind": "enter", "direction": direction,
+                             "size_pct": size_pct, "sl": sl, "tp": tp}
+
 
     def _do_enter(self, direction: str, price: float, size_pct: float,
                   ts: pd.Timestamp, sl: float, tp: float) -> None:
