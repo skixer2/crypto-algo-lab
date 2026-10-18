@@ -87,3 +87,13 @@ Vault (MEMORY.md/HEARTBEAT.md) carries pointers, not details.
 - DECREE (JP, permanent goal "the code that approaches the real result the most"): specialist curves must be FEE-FREE; the ONLY fee is the netted layer. Layer A (per-specialist embedded fees) = internal ledger fiction, never charged twice again.
 - Rebuild wave (after in-flight honest search delivers): fee=0 re-sims + next-open fills + intrabar SL/TP (WARN-5, same wave, one re-simulation) -> honest search re-run under real-account model -> walk-forward gates.
 - JP's paradox resolved + recorded: netting never increases a GIVEN trade's cost (B<=A per event), but B's event set includes lane-boundary weight swaps (A models none); as-built churn ~60 net-units/mo was lookahead-selected pathology.
+
+### 2026-10-18 — DS V4 Pro strategy report (bull seat + mining + blender) — INDEPENDENTLY VERIFIED
+- Report: reports/deepseek_bull_and_blender_strategy_20261018.md + evidence CSVs (bull_evidence_20261018/). My replication: gate split (+0.294/mid +0.340/crowded -0.259 fwd1d) and headline (+2.21%/mo t 1.58, halves +1.80 -> +2.62) reproduce EXACTLY.
+- FIND 1: expansion lane fwd-return edge ~0 -> detector is a BEAR detector; route defense with it, never source offense. Bull seat ceiling 15m: +1..2.5%/mo (funding drag on longs 11.5%/yr avg); seat = defensive participation + carry, not offense. 1h/1d no better (conditioning, not bar size, is the lever).
+- FIND 2 (the lead): funding-gated turtle192 latch (gate: 30d funding pctl < 0.7, causal): +2.21%/mo honest excess, t 1.58, plateau across gates 0.5-0.8, shift-2 invariant, OOS improves. FIRST honest t>1.5 candidate. NOT seal-grade (t bar was >=2); it is a lead, not a champion. Alpha_070 candidate. Caveat: fpct warmup uses bfill (minor, early-span only).
+- FIND 3: rent trap 3-18x bigger on long side; alpha_050 stored numbers suspect under same-bar fills.
+- Mining: re-mine from scratch on honest engine (salvage pipeline/detector grid/failure ledger only); declared small grids, plateau centroids, nested walk-forward as sole selection objective, mechanism story mandatory.
+- Blender verdict: lane-routing = defense-only frame; continuous blend rejected; online gating premature; ADOPT blend-level volatility-target overlay to enforce MDD law mechanically.
+- BUILD ORDER (endorsed): rebuild wave (fee-free + next-open fills + two-level stops per JP doctrine 09:36) -> alpha_070 gated latch -> blend v3-honest (walk-forward weights + funding gate + vol-target) -> deepen offensive pool -> online gating / NN skill-labels last.
+- CoinGlass decision now evidence-backed: funding conditioning was the largest single honest improvement found to date.

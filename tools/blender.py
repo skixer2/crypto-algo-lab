@@ -253,8 +253,10 @@ def flip_rent(weights, rets, lane_of_bar, bench_close, months, n_specialists, po
     s0 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=0)[1]["mean_excess"]
     s1 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=1)[1]["mean_excess"]
     share = (s0 - s1) / s0 if abs(s0) > 1e-9 else 0.0
+    meaningful = s1 > 0.5  # alarms are only defined for a positive honest edge
     return {"edge_if_samebar": round(s0, 2), "edge_honest": round(s1, 2),
-            "rent_share_pct": round(share * 100, 1), "alarm": bool(share > 0.25)}
+            "rent_share_pct": round(share * 100, 1) if meaningful else None,
+            "alarm": bool(meaningful and share > 0.25), "edge_negative": not meaningful}
 
 
 def relabel_invariance(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat, g_anchor):
@@ -264,9 +266,11 @@ def relabel_invariance(weights, rets, lane_of_bar, bench_close, months, n_specia
     weights = _renorm(weights)
     s1 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=1)[1]["mean_excess"]
     s2 = evaluate(weights, rets, lane_of_bar, bench_close, months, n_specialists, pos_mat=pos_mat, g_anchor=g_anchor, shift=2)[1]["mean_excess"]
-    retention = (s2 / s1) if s1 > 1e-9 else 0.0
+    meaningful = s1 > 0.5  # retention is only defined for a positive honest edge
+    retention = (s2 / s1) if meaningful else None
     return {"edge_shift1": round(s1, 2), "edge_shift2": round(s2, 2),
-            "retention": round(retention, 3), "alarm": bool(retention < 0.25)}
+            "retention": (round(retention, 3) if retention is not None else None),
+            "alarm": bool(meaningful and retention < 0.25), "edge_negative": not meaningful}
 
 
 def main():
