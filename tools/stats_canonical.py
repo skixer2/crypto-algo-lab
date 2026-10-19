@@ -141,6 +141,55 @@ def load_bench(path: str) -> pd.Series:
     return df["close"].astype(float).sort_index()
 
 
+def bench_monthly(bench_close: pd.Series) -> pd.Series:
+    """Bench total return per GRID month (fraction), indexed by month start."""
+    out = {}
+    for s in GRID:
+        e = s + pd.DateOffset(months=1)
+        r = _win_ret(bench_close, s, e)
+        if r is not None:
+            out[s] = r
+    return pd.Series(out)
+
+
+def sigma_m(bench_close: pd.Series) -> float:
+    """Pair's bench monthly-return volatility — the allowance floor (Law v3.2)."""
+    return float(bench_monthly(bench_close).std(ddof=1))
+
+
+def soft_scores(ex: np.ndarray, bm: np.ndarray, theta: float, sig_m: float,
+               deep: float = -35.0, s2: float = 2.0, s3: float = 3.0) -> np.ndarray:
+    """Per-month soft scores s_i (Law v3.2 anchored): allowance_i = max(theta*BMU_i, sig_m);
+    1:1 within allowance, s2 beyond, s3 below `deep`; single worst month charged as if `deep`."""
+    ex = np.asarray(ex, dtype=float) * 100.0 if abs(np.asarray(ex).max()) < 1.0 else np.asarray(ex, dtype=float)
+    bmu = np.maximum(np.asarray(bm, dtype=float), 0.0)
+    bmu = bmu * 100.0 if bmu.max() < 1.0 else bmu
+    allow = np.maximum(theta * bmu, 0.5 * sig_m * 100.0 if sig_m < 1.0 else 0.5 * sig_m)
+    s = ex.copy()
+    m = ex < -allow
+    s[m] = -allow[m] + s2 * (ex[m] + allow[m])
+    d = ex <= deep
+    s[d] = (-allow[d] + s2 * (deep + allow[d])) + s3 * (ex[d] - deep)
+    if len(s):
+        i = int(np.argmin(s))
+        cap = -allow[i] + s2 * (deep + allow[i])  # charge at the deep bound (sign-corrected)
+        s[i] = max(s[i], cap)
+    return s
+
+
+def calibrate_theta(ex_anchor: np.ndarray, bm: np.ndarray, sig_m: float, target: float = 0.3) -> float:
+    """Theta by anchor inversion (Law v3.2): solve so the anchor's mean soft score = target."""
+    lo, hi = 0.05, 3.0
+    for _ in range(60):
+        mid = (lo + hi) / 2.0
+        sc = soft_scores(ex_anchor, bm, mid, sig_m).mean()
+        if sc < target:
+            lo = mid
+        else:
+            hi = mid
+    return round((lo + hi) / 2.0, 3)
+
+
 def _selftest():
     idx = pd.date_range("2021-04-01", "2026-07-28", freq="15min", tz="UTC")
     bench_flat = pd.Series(100.0, index=idx)
