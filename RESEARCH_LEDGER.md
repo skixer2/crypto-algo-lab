@@ -119,3 +119,23 @@ Vault (MEMORY.md/HEARTBEAT.md) carries pointers, not details.
 - Rejections (honest ruler): confirmed-breakout m2/m3 negative (m1 > m2 > m3!), vol-scaled sizing dilutes the paying tail, washout-restart mechanism dead.
 - Structural finding: detector-7 expansion lane = plurality in 64/64 months -> lane-conditional exam degenerates to full grid for bull specialists; bear-est-8 stress slice used as compensation (+7.83/t1.53 for the candidate). TODO: better bull-lane definition before blend v3j.
 - Anchor convention note: ruler's strict month-boundary alignment vs round-1 one-bar misalignment = +0.13 drift; all r3+ numbers same-ruler (internally consistent); pre-r3 quotes carry +/-0.15.
+
+### 2026-10-19 19:38 UTC — STANDING CONSTITUTION APPROVED (JP): Entry Exam Law v3.2 (anchored) + Blender Law
+
+## LAW 1 — ENTRY EXAM v3.2(anchored), for candidate specialists
+Principle: floors protect deployability; prices express desirability. Earn in your lane, survive out of it.
+HARD FLOORS (binary): (1) OOS mean excess > 0; (2) worst ABSOLUTE month >= -40% (ruin; interlocks with engine 2x intrabar cat-stop); (3) jitter +/-15%/param, 2 draws: sign never flips, OOS stays >0; (4) shift-2 retention >= 0.25; (5) flip-rent < 25% of edge; (6) reality ratio >= 0.8 (engine vs arithmetic); (7) gate causality: settlement visible only from first decision >= 1 bar after publication.
+SOFT SCORE (per-month, averaged): allowance_i = theta x BMU_i (theta calibrated BY INVERSION vs the anchor so anchor scores modest-positive ~+0.3/mo; absolute floor = pair's bench monthly return vol sigma_M). Within allowance 1:1; beyond: 2x slope; deep zone (pair-anchored ~-35 ETH): 3x; single worst month charged as if at the deep bound (one priced freak). Score = mean(s_i) over >= 8 in-lane OOS months; t on s_i; halves/concentration/July-26 disclosed as diagnostics.
+PROCEDURE: nested walk-forward only (selection != reporting); stats_canonical ONLY (agents never grade their own homework); anchor-check-first + stop-on-discrepancy; anchor must score modest-positive under every parameter set; lane assignment via dominant-lane map (detector panel: det-7 = bear routing; bull-lane detector pending); blend-level exam stays standalone.
+REFERENCES: 076 gated latch: raw +2.11 t1.41 -> v3.2 +1.69 t_s 1.02, ALL floors pass, provisionally admitted. Anchor raw-latch net: +0.62 -> +0.12 (fixed-knee -15; triggers theta calibration at encode). Funding inputs: binance committed (+2.11) >> avg (+1.46) >> bybit (+0.79).
+
+## LAW 2 — BLENDER LAW (portfolio assembly & selection)
+Principle: the netted book is the product; selection pressure shapes it.
+MECHANICS: honest pairing shift=1 (label t acts on t+1 returns); netted-only fees 0.0008 x |Delta(sum w_i pos_i)| (curves fee-free); lane exposure cap sum|w|<=1; 63-window grid, July-26 disclosed ungraded; position-coverage assert at choke point.
+REWARDS: mean excess (primary); t; seg_dn (defense); up-capture (bull KPI); parsimony.
+SOFT PENALTIES (never vetoes): crash-shield per-window (ADD = frac x BDD, frac 0.7@BDD<=10 -> 0.5@BDD>=50; overshoot x=(SDD-ADD)/ADD x100 reading C; penalty = x*g) with g data-anchored (0.05@BDD=ga -> 1.0@BDD=50, ga = p25 of pair's window BDDs, ETH 8.9); MDD law v2 (free <= 15%, linear multiplicative haircut to 65%); OUT-PENALTY (prose, JP-approved wording): idleness = share of bars with net exposure under 5% of capital; free up to 10% of bars, escalating score penalty beyond — the anti-hiding clause (a blend that never trades cannot lose, cannot earn, and must not win).
+SEARCH: Optuna TPE, seed-deterministic; dims = lane weights x detector grid; prior champions enqueued; walk-forward selection only (v3h/v3i were the last full-span breeds); one ruler for reporting; detector-per-lane as searchable dim (pending); vol-target overlay planned (mechanical MDD enforcement); weights stored 3dp -> _renorm on reload.
+WINNER GUARDS (auto): flip-rent > 25% alarm; relabel retention < 0.25 alarm (positive edges only); July-26 always disclosed.
+REFERENCES: v2.1g anti-reference (+7.33 fake -> -5.29 honest); v3i real-account baseline (best -1.21, seg_dn +14.7, MDD 10.1) = the bar v3j must beat. Netted example (JP verbatim): Alpha1 buys 100, AlphaB sells 50 -> one +50 order, fee on 50.
+
+DEPLOYMENT LAYER (distinct): live rails v0 PROVISIONAL field-unverified (de-risk 20 / kill 25 continuous DD + slow-bleed), re-derived on first honest champion.
