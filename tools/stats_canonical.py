@@ -48,9 +48,9 @@ def _boundary_pct(x: float) -> float:
     return round(p, 2)
 
 
-def monthly_excesses(eq: pd.Series, bench_close: pd.Series) -> np.ndarray:
+def monthly_excesses(eq: pd.Series, bench_close: pd.Series, grid=None) -> np.ndarray:
     ex = []
-    for i, s in enumerate(GRID):
+    for s in (grid if grid is not None else GRID):
         e = s + pd.DateOffset(months=1)
         r_s, r_b = _win_ret(eq, s, e), _win_ret(bench_close, s, e)
         if r_s is None or r_b is None:
@@ -64,9 +64,19 @@ def continuous_dd(eq: pd.Series) -> float:
     return round(float(((eq - peak) / peak).min()) * 100.0, 1)
 
 
-def grade(eq: pd.Series, bench_close: pd.Series, name: str = "", pos: pd.Series | None = None, trap_asserts: bool = True) -> dict:
+def grade(eq: pd.Series, bench_close: pd.Series, name: str = "", pos: pd.Series | None = None, trap_asserts: bool = True, months_mask=None) -> dict:
+    """months_mask: optional list/array of month-start Timestamps (subset of GRID)
+    — Exam Law v2 lane-conditional mode: earning + survival measured on these months
+    only (e.g., a bull specialist's in-lane months). July stays disclosed separately."""
+    global GRID
+    if months_mask is not None:
+        keep = set(pd.Timestamp(m, tz="UTC") if m.tzinfo is None else pd.Timestamp(m) for m in months_mask)
+        grid = [s for s in GRID if s in keep]
+        assert len(grid) >= 8, f"mask leaves only {len(grid)} months — lane too rare for an exam"
+    else:
+        grid = GRID
     """eq, bench_close: tz-aware DatetimeIndex series (equity level, price)."""
-    ex = monthly_excesses(eq, bench_close)
+    ex = monthly_excesses(eq, bench_close, grid=grid)
     assert len(ex) >= 8, f"only {len(ex)} gradeable windows — grid/curve misaligned"
     mean_f = float(ex.mean())
     std = float(ex.std(ddof=1))
@@ -89,6 +99,15 @@ def grade(eq: pd.Series, bench_close: pd.Series, name: str = "", pos: pd.Series 
     }
     if pos is not None:
         out["time_in_pct"] = round(float((pos.abs() > 0.05).mean()) * 100.0, 0)
+    # Exam Law v2: absolute worst month (ruin floor) — strat return, not excess
+    strat_rets = []
+    for s in grid:
+        e = s + pd.DateOffset(months=1)
+        r_s = _win_ret(eq, s, e)
+        if r_s is not None:
+            strat_rets.append(r_s)
+    if strat_rets:
+        out["worst_absolute_month_pct"] = _boundary_pct(min(strat_rets))
     # trap asserts (round-2 lesson): aggregates must be plausible (synthetic
     # deterministic fixtures legitimately exceed the t-cap — they pass False)
     if trap_asserts:
