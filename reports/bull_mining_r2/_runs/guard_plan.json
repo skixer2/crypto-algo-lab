@@ -1,0 +1,6 @@
+{
+ "G3_center": {"cls": "cbs", "kw": {"N": 144, "m": 2, "gate": 0.5, "sigma_target": 0.005, "smin": 0.25}},
+ "G3_modal":  {"cls": "cbs", "kw": {"N": 192, "m": 2, "gate": 0.7, "sigma_target": 0.005, "smin": 0.25}},
+ "G2_center": {"cls": "vs",  "kw": {"N": 192, "atr_n": 96, "buf": 1.0, "gate": 0.5, "sigma_target": 0.005, "smin": 0.25}},
+ "INCUMBENT_g05": {"cls": "turtle", "kw": {"N": 192, "atr_n": 96, "buf": 1.0, "gate": 0.5}}
+}
