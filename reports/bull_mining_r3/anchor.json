@@ -1,0 +1,34 @@
+{
+ "A1_gross_fees_only": {
+  "name": "anchor_A1_raw_turtle192_gross",
+  "mean_excess_pct_mo": 1.25,
+  "t": 0.86,
+  "worst_window_pct": -27.57,
+  "best_window_pct": 32.65,
+  "first_half_pct": 0.87,
+  "second_half_pct": 1.61,
+  "concentration": 0.42,
+  "neg_windows": 31,
+  "n_windows": 63,
+  "continuous_dd_pct": -53.5,
+  "july26_partial_pct": -10.67,
+  "time_in_pct": 62.0,
+  "worst_absolute_month_pct": -22.09
+ },
+ "A2_net_binance_funding": {
+  "name": "anchor_A2_raw_turtle192_funding_charged",
+  "mean_excess_pct_mo": 0.62,
+  "t": 0.42,
+  "worst_window_pct": -29.56,
+  "best_window_pct": 32.59,
+  "first_half_pct": 0.17,
+  "second_half_pct": 1.07,
+  "concentration": 0.83,
+  "neg_windows": 32,
+  "n_windows": 63,
+  "continuous_dd_pct": -55.3,
+  "july26_partial_pct": -10.97,
+  "time_in_pct": 62.0,
+  "worst_absolute_month_pct": -22.01
+ }
+}

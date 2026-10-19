@@ -1,0 +1,33 @@
+{
+  "declared_at_utc": "BEFORE any grading run (anchor aside). Selection = plateau centroid within family, never grid max.",
+  "substrate": "bar arithmetic, compose_portfolio law: eff=decision.shift(1); ret=close.pct_change; fee=0.0008*|d eff|; funding -rate*eff at 00/08/16 UTC bars; graded ONLY via tools.stats_canonical.grade",
+  "families": {
+    "C_funding_gated_turtle192": {
+      "base": "N=192, buf=1*ATR96 (SMA-TR min_periods=32), size 1",
+      "inputs": ["binance_proxy", "bybit", "avg(committed)"],
+      "gates_per_input": [0.5, 0.7],
+      "fpct": "causal 30d rolling percentile (90 settlements, no bfill)"
+    },
+    "A_confirmed_breakout": {
+      "N": [144, 192, 288], "m_consec_closes": [2, 3], "gate": "none in stage 1; gate grid {bin,byb,avg}x{0.5,0.7} ONLY on the N x m plateau centroid"
+    },
+    "B_vol_scaled_turtle": {
+      "N": 192, "sigma_target": [0.004, 0.005, 0.006], "smin": [0.25, 0.5], "sigma": "ATR96/close",
+      "gate": "none in stage 1; gate grid on the centroid only"
+    },
+    "D_washout_restart_NEW": {
+      "mechanism": "a >=20-30% drawdown within 30-60d = liquidation cascade reset crowded-long positioning; subsequent 192-high breakouts are bought by fresh uncrowded flow -> continuation, not fade. Price-memory crowding proxy, orthogonal to funding data risk.",
+      "on": "turtle192 base, no funding gate",
+      "K_days_lookback": [30, 60], "D_drawdown": [0.20, 0.30],
+      "def": "washout = rolling_min(close/K*96) / rolling_max(close/90*96) - 1 <= -D ; entry = breakout & washout"
+    }
+  },
+  "exam_law_v2": {
+    "in_lane": "mean excess >= +0.8 %/mo, t >= 1.0, >= 8 months, both halves >= 0, worst in-lane EXCESS month >= -15%",
+    "out_of_lane": "worst ABSOLUTE month (full 63m grid) >= -40%",
+    "jitter": "+/-15% on key params never flips mean-excess sign",
+    "july_2026": "disclosed, ungraded"
+  },
+  "reality_ratio": "engine/arithmetic >= 0.8 on one config per recruited pipeline (run_backtest fast path + gated model through framework.runner)",
+  "funding_cost": "recruit headline = avg-input funding charged; gross + per-input nets disclosed"
+}

@@ -1,0 +1,73 @@
+{
+ "route1_raw192": {
+  "engine": {
+   "name": "engine_raw192_run_backtest_net",
+   "mean_excess_pct_mo": 0.52,
+   "t": 0.35,
+   "worst_window_pct": -29.69,
+   "best_window_pct": 32.61,
+   "first_half_pct": 0.09,
+   "second_half_pct": 0.94,
+   "concentration": 0.99,
+   "neg_windows": 33,
+   "n_windows": 63,
+   "continuous_dd_pct": -55.4,
+   "july26_partial_pct": -10.98,
+   "worst_absolute_month_pct": -22.05
+  },
+  "arithmetic": {
+   "name": "arith_raw192_net",
+   "mean_excess_pct_mo": 0.62,
+   "t": 0.42,
+   "worst_window_pct": -29.71,
+   "best_window_pct": 32.6,
+   "first_half_pct": 0.19,
+   "second_half_pct": 1.04,
+   "concentration": 0.83,
+   "neg_windows": 33,
+   "n_windows": 63,
+   "continuous_dd_pct": -55.4,
+   "july26_partial_pct": -10.96,
+   "worst_absolute_month_pct": -22.07
+  },
+  "reality_ratio": 0.839,
+  "position_corr": 0.9957,
+  "pos_match_pct": 99.8
+ },
+ "route2_gated": {
+  "engine": {
+   "name": "engine_gated_run_strategy_net",
+   "mean_excess_pct_mo": 2.11,
+   "t": 1.41,
+   "worst_window_pct": -32.7,
+   "best_window_pct": 28.26,
+   "first_half_pct": 2.14,
+   "second_half_pct": 2.09,
+   "concentration": 0.21,
+   "neg_windows": 29,
+   "n_windows": 63,
+   "continuous_dd_pct": -47.5,
+   "july26_partial_pct": -10.96,
+   "worst_absolute_month_pct": -18.83
+  },
+  "arithmetic": {
+   "name": "arith_gated_net",
+   "mean_excess_pct_mo": 2.11,
+   "t": 1.41,
+   "worst_window_pct": -32.71,
+   "best_window_pct": 28.27,
+   "first_half_pct": 2.14,
+   "second_half_pct": 2.09,
+   "concentration": 0.21,
+   "neg_windows": 29,
+   "n_windows": 63,
+   "continuous_dd_pct": -47.5,
+   "july26_partial_pct": -10.96,
+   "worst_absolute_month_pct": -18.82
+  },
+  "reality_ratio": 1.0,
+  "position_corr": 0.997,
+  "pos_match_pct": 99.85,
+  "trades": 0
+ }
+}

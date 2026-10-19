@@ -1,0 +1,47 @@
+{
+ "bear8_months": [
+  "2023-08-01",
+  "2026-06-01",
+  "2026-02-01",
+  "2023-09-01",
+  "2022-06-01",
+  "2026-01-01",
+  "2023-07-01",
+  "2025-12-01"
+ ],
+ "bear8_candidate": {
+  "name": "C_t192_bin_g0.7_bear8",
+  "mean_excess_pct_mo": 7.83,
+  "t": 1.53,
+  "worst_window_pct": -15.19,
+  "best_window_pct": 25.86,
+  "first_half_pct": 7.69,
+  "second_half_pct": 7.98,
+  "concentration": 0.41,
+  "neg_windows": 3,
+  "n_windows": 8,
+  "continuous_dd_pct": -47.5,
+  "july26_partial_pct": -10.96,
+  "worst_absolute_month_pct": -18.82
+ },
+ "bear8_anchor": {
+  "mean": 7.4,
+  "t": 1.32,
+  "worst": -15.19
+ },
+ "shift2": {
+  "name": "C_t192_bin_g0.7_shift2",
+  "mean_excess_pct_mo": 2.2,
+  "t": 1.45,
+  "worst_window_pct": -33.31,
+  "best_window_pct": 31.09,
+  "first_half_pct": 2.35,
+  "second_half_pct": 2.06,
+  "concentration": 0.22,
+  "neg_windows": 25,
+  "n_windows": 63,
+  "continuous_dd_pct": -52.6,
+  "july26_partial_pct": -10.71,
+  "worst_absolute_month_pct": -20.5
+ }
+}
