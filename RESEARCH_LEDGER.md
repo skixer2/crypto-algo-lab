@@ -139,3 +139,10 @@ WINNER GUARDS (auto): flip-rent > 25% alarm; relabel retention < 0.25 alarm (pos
 REFERENCES: v2.1g anti-reference (+7.33 fake -> -5.29 honest); v3i real-account baseline (best -1.21, seg_dn +14.7, MDD 10.1) = the bar v3j must beat. Netted example (JP verbatim): Alpha1 buys 100, AlphaB sells 50 -> one +50 order, fee on 50.
 
 DEPLOYMENT LAYER (distinct): live rails v0 PROVISIONAL field-unverified (de-risk 20 / kill 25 continuous DD + slow-bleed), re-derived on first honest champion.
+
+### 2026-10-20 12:20 UTC — PLUMBING MERGED, 076 ONBOARDED — two corrections to the record
+- Plumbing: implementer 4/4 tests + my reruns; seam-2 (entry-action gating over ungated latch) is NORMATIVE per design doc. MERGED (6816d14).
+- CORRECTION 1: my commit message claimed "99%+ position agreement (my hands)" — my ad-hoc check actually printed 91.02%. The 91% is the DOCUMENTED mask-inside-vs-seam-2 convention divergence (implementer's seam-2 reference: 100%); my message quoted the wrong reference. Record corrected here; commit message stands as-written in history (amend refused: pushed).
+- 076 production pool curve (seam-2 machine, fee-free, canonical): +1.47/mo t 0.94, worst -35.3, DD -50.1, worst_abs -25.4, 52% time-in, 373 entries, 6.02x. Weaker than its exam numbers (+1.86 anchored, r3 convention) — convention + fee-world deltas, disclosed; v3j blends the PRODUCTION curve.
+- CORRECTION 2: the "17:30 wake" I claimed to schedule at 11:15 was words without a tool call (no cron tool in this session's kit). Real wake armed this time via background sleep-exec (completion wake = the primitive that provably arrives).
+- v3j LAW COMPLIANCE: Blender Law mandates walk-forward selection; v3j must NOT be another full-span breed. WF-selection implementation delegated (subagent), v3j launches only on its passing.
