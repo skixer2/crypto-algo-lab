@@ -57,6 +57,12 @@ class WQAlphaParams:
     use_funding_gate: bool = False
     funding_gate_pctl: float = 0.5    # enter only if funding rank < this
     funding_input: str = "avg"        # binance | bybit | avg (both venues' CSVs)
+    # Machine A (JP 2026-10-20): 'predict' = engine-level gate in predict()
+    # (Machine B, wait-then-enter-late); 'formula' = the fund_pct series is
+    # injected as a 'fund_pct' COLUMN into the frame the formula receives and
+    # the gate lives inside the formula's state machine (skip-while-crowded,
+    # re-arm on next fresh breakout). Same series both ways (ENG note).
+    funding_gate_mode: str = "predict"
 
 
 class WQAlphaMinerModel:
@@ -126,12 +132,26 @@ class WQAlphaMinerModel:
         if len(buf) > self.p.buffer_size:
             del buf[: len(buf) - self.p.buffer_size]
 
+    def _formula_frame(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Machine A (funding_gate_mode='formula'): materialize the formula's
+        input frame with the funding-gate series as a plain 'fund_pct' column.
+        Formulas stay pure functions of their input frame; values are identical
+        to the fast path's injected column (same underlying series, exact-index
+        reindex). predict() AND manage_position() must both see it — the
+        formula's signal drives entries and structural exits alike.
+        """
+        if (self.p.use_funding_gate
+                and getattr(self.p, "funding_gate_mode", "predict") == "formula"
+                and self.fund_pct is not None):
+            df = df.assign(fund_pct=self.fund_pct.reindex(df.index).astype(float))
+        return df
+
     def predict(self, allow_shorts: bool = True) -> Tuple[Action, float, Dict]:
         buf = self._buffers[self.execution_tf]
         if len(buf) < self._min_history:
             return "flat", 0.0, self._last_indicators
 
-        df = pd.DataFrame(buf).set_index("timestamp")
+        df = self._formula_frame(pd.DataFrame(buf).set_index("timestamp"))
         close = float(df["close"].iloc[-1])
 
         sig = self._compute_signal(df)
@@ -142,9 +162,14 @@ class WQAlphaMinerModel:
         bias_bull = self._bias_trend()  # None if no filter / not enough data
 
         # Funding gate (entry-only; NaN rank => gate closed, mirrors the
-        # verified scripts' (fpct < pctl).fillna(False) convention).
+        # verified scripts' (fpct < pctl).fillna(False) convention). Machine A
+        # (funding_gate_mode='formula') keeps this INERT — the gate lives in
+        # the formula via the injected column; a second engine-level gate
+        # would re-introduce wait-then-enter-late on top of skip-while-crowded.
         fund_ok = True
-        if self.p.use_funding_gate and self.fund_pct is not None:
+        if (self.p.use_funding_gate
+                and getattr(self.p, "funding_gate_mode", "predict") != "formula"
+                and self.fund_pct is not None):
             fv = self.fund_pct.get(buf[-1]["timestamp"])
             fund_ok = bool(fv is not None and fv == fv
                            and float(fv) < self.p.funding_gate_pctl)
@@ -193,7 +218,7 @@ class WQAlphaMinerModel:
         buf = self._buffers[self.execution_tf]
         if len(buf) < self._min_history:
             return None
-        df = pd.DataFrame(buf).set_index("timestamp")
+        df = self._formula_frame(pd.DataFrame(buf).set_index("timestamp"))
         sig = self._compute_signal(df)
         if sig is None:
             return None

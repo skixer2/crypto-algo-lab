@@ -123,13 +123,26 @@ class FastWQAlphaMinerModel:
                 # structure; full-CSV slices diverge on the first ~33 candles,
                 # which survives long-span EWM warmup — verifier case 4).
                 run_df = self.ctx.exec_df.iloc[self._base:]
+                # Machine A (funding_gate_mode='formula'): the fund_pct series
+                # rides INTO the formula as a plain column — the gate lives
+                # inside the formula's state machine (skip-while-crowded,
+                # re-arm on fresh breakout); formulas stay pure functions of
+                # their input frame. Same values as the direct path's column
+                # (same underlying series, run-relative slice).
+                formula_gate = (self.p.use_funding_gate and getattr(
+                    self.p, "funding_gate_mode", "predict") == "formula")
+                if formula_gate and getattr(self.ctx, "fund_pct", None) is not None:
+                    run_df = run_df.assign(
+                        fund_pct=self.ctx.fund_pct.iloc[self._base:].astype(float))
                 raw = pd.Series(self.ctx.mod.calculate_math_signal(run_df)).astype(float)
                 self._sig = raw.ewm(span=self._span, adjust=False) \
                     .mean().fillna(0.0).clip(-1.0, 1.0)
-                # Funding-gate slice: run-relative, exactly like run_df/_sig
-                # (ENG_funding_plumbing.md seam 2).
+                # Funding-gate slice for the engine-level gate (Machine B,
+                # mode='predict' ONLY — in formula mode the predict()-level
+                # gate must stay inert, otherwise entries get double-gated).
                 self._fund = (self.ctx.fund_pct.iloc[self._base:].astype(float)
-                              if getattr(self.ctx, "fund_pct", None) is not None
+                              if (getattr(self.ctx, "fund_pct", None) is not None
+                                  and not formula_gate)
                               else None)
                 h, l, c = run_df["high"], run_df["low"], run_df["close"]
                 prev = c.shift(1)
