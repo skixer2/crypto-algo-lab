@@ -286,6 +286,39 @@
    "v32_anchored_score": 1.86,
    "t_s": 1.18,
    "raw_net_mean_exc": 2.11
+  },
+  "retired": "2026-10-20: superseded by alpha_076a (Machine A) \u2014 B dies per JP rule"
+ },
+ "alpha_076a": {
+  "src_run": "machine-a-impl 2026-10-20 (JP: 'if A works better, B dies')",
+  "params": {
+   "long_threshold": 0.5,
+   "short_threshold": 0.55,
+   "signal_smoothing": 1,
+   "atr_period": 14,
+   "atr_stop_mult": 50.0,
+   "atr_take_mult": 50.0,
+   "max_position_pct": 1.0,
+   "warmup_candles": 100,
+   "use_bias_filter": false,
+   "signal_exit_threshold": 0.5,
+   "use_funding_gate": true,
+   "funding_gate_pctl": 0.7,
+   "funding_input": "binance",
+   "funding_gate_mode": "formula"
+  },
+  "span": [
+   "2021-01-01T00:00:00+00:00",
+   "2026-07-28T00:00:00+00:00"
+  ],
+  "rows": 195265,
+  "final_equity_fee_free": 126415.52922994258,
+  "supersedes": "alpha_076 (Machine B, retired from pool)",
+  "grade_fee_free": {
+   "mean_exc": 2.89,
+   "t": 1.96,
+   "worst_abs_month": -18.47,
+   "dd": -46.2
   }
  }
 }
