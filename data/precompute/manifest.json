@@ -258,5 +258,34 @@
   "rows": 195265,
   "sec": 24.9,
   "final_equity": 40248.8064752935
+ },
+ "alpha_076": {
+  "src_run": "ds-v4pro-bull-r3 + ENG_funding_plumbing onboarding (constitution 2026-10-19)",
+  "params": {
+   "long_threshold": 0.5,
+   "short_threshold": 0.55,
+   "signal_smoothing": 1,
+   "atr_period": 14,
+   "atr_stop_mult": 50.0,
+   "atr_take_mult": 50.0,
+   "max_position_pct": 1.0,
+   "warmup_candles": 100,
+   "use_bias_filter": false,
+   "signal_exit_threshold": 0.5,
+   "use_funding_gate": true,
+   "funding_gate_pctl": 0.7,
+   "funding_input": "binance"
+  },
+  "span": [
+   "2021-01-01T00:00:00+00:00",
+   "2026-07-28T00:00:00+00:00"
+  ],
+  "rows": 195265,
+  "final_equity_fee_free": 60209.99593382107,
+  "exam": {
+   "v32_anchored_score": 1.86,
+   "t_s": 1.18,
+   "raw_net_mean_exc": 2.11
+  }
  }
 }

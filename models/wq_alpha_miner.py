@@ -49,6 +49,14 @@ class WQAlphaParams:
     bias_fast: int = 50
     bias_slow: int = 200
     signal_exit_threshold: Optional[float] = None  # exit held position when signal flips beyond this (None = off)
+    # ── Funding gate (ENG_funding_plumbing.md, 2026-10-19) ──────────
+    # Entry-gating only: entries require the settled-funding percentile rank
+    # (30d rolling, see tuner.alpha_orchestrator.build_fund_pct) to be BELOW
+    # funding_gate_pctl at the decision bar. Exits are NEVER gated. Funding
+    # COST is not charged here (evaluation-layer concern, JP laws).
+    use_funding_gate: bool = False
+    funding_gate_pctl: float = 0.5    # enter only if funding rank < this
+    funding_input: str = "avg"        # binance | bybit | avg (both venues' CSVs)
 
 
 class WQAlphaMinerModel:
@@ -95,6 +103,10 @@ class WQAlphaMinerModel:
         self._buffers: Dict[str, List[dict]] = {tf: [] for tf in [execution_tf] + self.bias_tfs}
         self._last_indicators: Dict = {}
         self._formula_error_logged = False
+        # Funding-gate series (ENG_funding_plumbing.md seam 3): aligned to the
+        # FULL exec-CSV index; the orchestrator attaches it when
+        # params.use_funding_gate. predict() consumes it if present.
+        self.fund_pct: Optional[pd.Series] = None
         # EWM smoothing needs ~3 spans of history to converge — enforce it in warmup
         # so early signals aren't under-smoothed vs long backtests (audit 2026-09-29).
         self._min_history = max(int(self.p.warmup_candles), 3 * int(self.p.signal_smoothing or 1))
@@ -129,13 +141,23 @@ class WQAlphaMinerModel:
         atr = self._compute_atr(df)
         bias_bull = self._bias_trend()  # None if no filter / not enough data
 
+        # Funding gate (entry-only; NaN rank => gate closed, mirrors the
+        # verified scripts' (fpct < pctl).fillna(False) convention).
+        fund_ok = True
+        if self.p.use_funding_gate and self.fund_pct is not None:
+            fv = self.fund_pct.get(buf[-1]["timestamp"])
+            fund_ok = bool(fv is not None and fv == fv
+                           and float(fv) < self.p.funding_gate_pctl)
+
         action: Action = "flat"
-        if sig >= self.p.long_threshold and (bias_bull is None or bias_bull):
+        if (sig >= self.p.long_threshold and (bias_bull is None or bias_bull)
+                and fund_ok):
             action = "long"
         elif (
             allow_shorts
             and sig <= -self.p.short_threshold
             and (bias_bull is None or not bias_bull)
+            and fund_ok
         ):
             action = "short"
 

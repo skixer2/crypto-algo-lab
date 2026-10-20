@@ -33,6 +33,7 @@ import time
 from dataclasses import asdict
 from typing import Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -77,15 +78,100 @@ def slice_metrics(eq_df: pd.DataFrame, start: str, end: str, bench_df: pd.DataFr
 
 from tuner.holdout import guard_data_end as _holdout_guard  # library-level seal
 
+
+# ── funding-gate series (ENG_funding_plumbing.md, 2026-10-19) ─────────
+
+FUNDING_DATA_DIR = os.path.join(REPO_ROOT, "framework", "data_cache")
+_FUND_PCT_CACHE: Dict[str, pd.Series] = {}
+
+
+def _load_settled_funding(venue: str, symbol: str) -> pd.Series:
+    """Settled per-8h funding rates for one venue, stamped AT settle time.
+
+    Settlements are floored to the 00/08/16 UTC grid (same 'bucket'
+    convention as the verified latch scripts); latest row wins per bucket.
+    """
+    base = symbol.replace("/", "")
+    pattern = os.path.join(FUNDING_DATA_DIR, f"{venue}_{base}_funding*.csv")
+    matches = sorted(glob.glob(pattern))
+    if not matches:
+        raise FileNotFoundError(f"no funding CSV for {venue} {symbol}: {pattern}")
+    d = pd.read_csv(matches[-1])
+    try:
+        t = pd.to_datetime(d["ts"], utc=True)
+    except ValueError:
+        # mixed fractional/whole seconds across venue CSVs (pandas 3 strict)
+        t = pd.to_datetime(d["ts"], utc=True, format="mixed")
+    rcol = "rate" if "rate" in d.columns else "fundingRate"
+    s = pd.Series(d[rcol].astype(float).values, index=t.dt.floor("8h"))
+    return s[~s.index.duplicated(keep="last")].sort_index()
+
+
+def build_fund_pct(exec_df: pd.DataFrame, funding_input: str = "avg",
+                   symbol: str = "ETH/USDT") -> pd.Series:
+    """Funding gate series per ENG_funding_plumbing.md — the engine convention.
+
+    1. Venue settled-rate series stamped AT settle time, reindexed onto the
+       exec index with method='ffill' (settlements are public at settle_ts;
+       the first DECISION that can use a settlement happens >= 1 bar after
+       the settle timestamp, i.e. at the close of the first bar whose open
+       >= settle ts — the publication margin).
+    2. funding_input='avg' = elementwise mean of the two venues' ffilled
+       rates BEFORE the rank (skipna, matching the verified merge).
+    3. Gate = 30-day rolling percentile rank of the 15m-ffilled rate
+       (window 96*30 bars, min_periods 96*7). Rank = share of the window
+       strictly before the current bar whose value <= current — the same
+       convention as the verified latch scripts (window-before-current
+       count-le mean), just on the ffilled grid.
+
+    NaN rank (first 96*7 valid bars / pre-first-settlement) => gate closed.
+    """
+    idx = exec_df.index
+    if funding_input == "avg":
+        a = _load_settled_funding("binance", symbol).reindex(idx, method="ffill")
+        b = _load_settled_funding("bybit", symbol).reindex(idx, method="ffill")
+        rate_15m = pd.concat([a, b], axis=1).mean(axis=1)
+    elif funding_input in ("binance", "bybit"):
+        rate_15m = _load_settled_funding(funding_input, symbol).reindex(
+            idx, method="ffill")
+    else:
+        raise ValueError(f"unknown funding_input: {funding_input}")
+    win, mp = 96 * 30, 96 * 7
+
+    def _pct_rank(w: np.ndarray) -> float:
+        return float((w[:-1] <= w[-1]).mean())
+
+    return rate_15m.rolling(win, min_periods=mp).apply(_pct_rank, raw=True)
+
+
+def _fund_pct_for(exec_csv: str, funding_input: str) -> pd.Series:
+    """Cached build_fund_pct over a full exec CSV (per dataset+input)."""
+    key = f"{os.path.abspath(exec_csv)}|{funding_input}"
+    if key not in _FUND_PCT_CACHE:
+        df = pd.read_csv(exec_csv, parse_dates=["timestamp"], index_col="timestamp")
+        df.sort_index(inplace=True)
+        _FUND_PCT_CACHE[key] = build_fund_pct(df, funding_input)
+    return _FUND_PCT_CACHE[key]
+
+
 def run_backtest(params: WQAlphaParams, symbol: str, exec_tf: str, bias_tf: str,
                  csv_paths: Dict[str, str], start: str, end: str,
                  ctx=None, allow_shorts: bool = True, fee: float = 0.0008) -> Optional[pd.DataFrame]:
     _holdout_guard(end, final_run=False)  # library-level holdout seal
+    # Funding-gate plumbing (ENG_funding_plumbing.md seams 1-3): build the
+    # settled-funding percentile series once per (dataset, input) and hand it
+    # to whichever path runs. Funding COST stays out of here (seam 4).
+    fund_series = None
+    if getattr(params, "use_funding_gate", False):
+        fund_series = _fund_pct_for(csv_paths[exec_tf], params.funding_input)
     if ctx is not None:
         from models.wq_alpha_fast import FastWQAlphaMinerModel
+        if fund_series is not None and getattr(ctx, "fund_pct", None) is None:
+            ctx.fund_pct = fund_series  # lazy attach (gate params fixed per study)
         model = FastWQAlphaMinerModel(params, ctx, execution_tf=exec_tf, bias_tfs=[bias_tf])
     else:
         model = WQAlphaMinerModel(params, execution_tf=exec_tf, bias_tfs=[bias_tf])
+        model.fund_pct = fund_series  # direct path has no context — attach
     # 3-day lookback pad: saturate model buffers (warmup, EWM smoothing) BEFORE the
     # measured window starts — removes the 15h+ dead zone at window start (audit Q2).
     padded_start = (pd.Timestamp(start) - pd.Timedelta(days=3)).isoformat()

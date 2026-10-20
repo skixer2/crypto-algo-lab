@@ -37,9 +37,14 @@ class FastContext:
     """Immutable per-dataset precomputation shared across all trials."""
 
     def __init__(self, exec_df: pd.DataFrame, bias_df: Optional[pd.DataFrame],
-                 formula_path: str):
+                 formula_path: str,
+                 fund_pct: Optional[pd.Series] = None):
         self.exec_df = exec_df
         self.bias_df = bias_df
+        # Optional funding-gate series (ENG_funding_plumbing.md seam 1):
+        # settled-funding 30d percentile rank aligned to exec_df.index. The
+        # orchestrator attaches it lazily when params.use_funding_gate.
+        self.fund_pct = fund_pct
         self.exec_index = exec_df.index
         self.formula_path = formula_path
         self.formula_name = os.path.basename(formula_path)
@@ -100,6 +105,7 @@ class FastWQAlphaMinerModel:
         self._bias_tick = 0   # bias candles fed this run
         self._base = None      # CSV position of this run's first exec candle
         self._bias_base = None # CSV position of this run's first bias candle
+        self._fund: Optional[pd.Series] = None  # run-relative funding-gate slice
         self._last_indicators: Dict = {}
 
     # ── Module 3 contract (same as the incremental reference) ───────
@@ -120,6 +126,11 @@ class FastWQAlphaMinerModel:
                 raw = pd.Series(self.ctx.mod.calculate_math_signal(run_df)).astype(float)
                 self._sig = raw.ewm(span=self._span, adjust=False) \
                     .mean().fillna(0.0).clip(-1.0, 1.0)
+                # Funding-gate slice: run-relative, exactly like run_df/_sig
+                # (ENG_funding_plumbing.md seam 2).
+                self._fund = (self.ctx.fund_pct.iloc[self._base:].astype(float)
+                              if getattr(self.ctx, "fund_pct", None) is not None
+                              else None)
                 h, l, c = run_df["high"], run_df["low"], run_df["close"]
                 prev = c.shift(1)
                 tr = pd.concat([h - l, (h - prev).abs(), (l - prev).abs()],
@@ -162,11 +173,20 @@ class FastWQAlphaMinerModel:
             if self._bias_tick >= self.p.bias_slow:
                 bias_bull = bool(self._bias_bull.iat[self._bias_tick - 1])
 
+        # Funding gate (entry-only; NaN rank => gate closed — same
+        # (fpct < pctl).fillna(False) convention as the verified scripts).
+        # Mirror of the bias gate: second AND condition on entry actions.
+        fund_ok = True
+        if self.p.use_funding_gate and self._fund is not None:
+            fv = float(self._fund.iat[self._tick - 1])
+            fund_ok = bool(fv == fv and fv < self.p.funding_gate_pctl)
+
         action: Action = "flat"
-        if sig >= self.p.long_threshold and (bias_bull is None or bias_bull):
+        if (sig >= self.p.long_threshold and (bias_bull is None or bias_bull)
+                and fund_ok):
             action = "long"
         elif (allow_shorts and sig <= -self.p.short_threshold
-              and (bias_bull is None or not bias_bull)):
+              and (bias_bull is None or not bias_bull) and fund_ok):
             action = "short"
 
         indicators: Dict = {
