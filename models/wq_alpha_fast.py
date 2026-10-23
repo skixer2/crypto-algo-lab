@@ -38,13 +38,18 @@ class FastContext:
 
     def __init__(self, exec_df: pd.DataFrame, bias_df: Optional[pd.DataFrame],
                  formula_path: str,
-                 fund_pct: Optional[pd.Series] = None):
+                 fund_pct: Optional[pd.Series] = None,
+                 btc_mom: Optional[pd.Series] = None):
         self.exec_df = exec_df
         self.bias_df = bias_df
         # Optional funding-gate series (ENG_funding_plumbing.md seam 1):
         # settled-funding 30d percentile rank aligned to exec_df.index. The
         # orchestrator attaches it lazily when params.use_funding_gate.
         self.fund_pct = fund_pct
+        # Optional BTC-trend gate series (alpha_076c pilot): causal BTC 30d
+        # momentum ratio aligned to exec_df.index; attached by the caller when
+        # params.use_btc_mom_gate (same seam as fund_pct).
+        self.btc_mom = btc_mom
         self.exec_index = exec_df.index
         self.formula_path = formula_path
         self.formula_name = os.path.basename(formula_path)
@@ -134,6 +139,15 @@ class FastWQAlphaMinerModel:
                 if formula_gate and getattr(self.ctx, "fund_pct", None) is not None:
                     run_df = run_df.assign(
                         fund_pct=self.ctx.fund_pct.iloc[self._base:].astype(float))
+                # alpha_076c (BTC-trend entry gate): same column-injection
+                # pattern as fund_pct — the caller attaches a btc_mom ratio
+                # series (btc/btc.shift(window), reindex ffill) ALIGNED TO THE
+                # FULL exec-CSV index to ctx; the formula shifts the state by
+                # 1 bar itself, so this is a plain slice like fund_pct.
+                if (getattr(self.p, "use_btc_mom_gate", False)
+                        and getattr(self.ctx, "btc_mom", None) is not None):
+                    run_df = run_df.assign(
+                        btc_mom=self.ctx.btc_mom.iloc[self._base:].astype(float))
                 raw = pd.Series(self.ctx.mod.calculate_math_signal(run_df)).astype(float)
                 self._sig = raw.ewm(span=self._span, adjust=False) \
                     .mean().fillna(0.0).clip(-1.0, 1.0)

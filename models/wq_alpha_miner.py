@@ -63,6 +63,13 @@ class WQAlphaParams:
     # the gate lives inside the formula's state machine (skip-while-crowded,
     # re-arm on next fresh breakout). Same series both ways (ENG note).
     funding_gate_mode: str = "predict"
+    # alpha_076c pilot (REPORT §3, frozen 2026-10-22): optional injection of
+    # the causal BTC 30d momentum ratio as a plain 'btc_mom' COLUMN into the
+    # formula frame — same seam/pattern as fund_pct in formula mode. The BTC
+    # gate lives INSIDE the formula (entry-gated state machine: blocked
+    # breakouts are not remembered; rides continue to structural exits; NaN
+    # => gate closed). The series itself is built/attached by the caller.
+    use_btc_mom_gate: bool = False
 
 
 class WQAlphaMinerModel:
@@ -113,6 +120,9 @@ class WQAlphaMinerModel:
         # FULL exec-CSV index; the orchestrator attaches it when
         # params.use_funding_gate. predict() consumes it if present.
         self.fund_pct: Optional[pd.Series] = None
+        # BTC-trend gate series (alpha_076c pilot): same alignment contract;
+        # attached by the caller when params.use_btc_mom_gate.
+        self.btc_mom: Optional[pd.Series] = None
         # EWM smoothing needs ~3 spans of history to converge — enforce it in warmup
         # so early signals aren't under-smoothed vs long backtests (audit 2026-09-29).
         self._min_history = max(int(self.p.warmup_candles), 3 * int(self.p.signal_smoothing or 1))
@@ -144,6 +154,9 @@ class WQAlphaMinerModel:
                 and getattr(self.p, "funding_gate_mode", "predict") == "formula"
                 and self.fund_pct is not None):
             df = df.assign(fund_pct=self.fund_pct.reindex(df.index).astype(float))
+        if (getattr(self.p, "use_btc_mom_gate", False)
+                and getattr(self, "btc_mom", None) is not None):
+            df = df.assign(btc_mom=self.btc_mom.reindex(df.index).astype(float))
         return df
 
     def predict(self, allow_shorts: bool = True) -> Tuple[Action, float, Dict]:

@@ -1,0 +1,395 @@
+{
+ "meta": {
+  "started": "2026-10-23 11:22:53 UTC",
+  "fee": 0.0008,
+  "span": [
+   "2021-01-01T00:00:00+00:00",
+   "2026-07-28T00:00:00+00:00"
+  ],
+  "engine_fee": 0.0,
+  "allow_shorts": false
+ },
+ "replay_check": {
+  "identical": false,
+  "n_diff": 17,
+  "samebar_diff": 322
+ },
+ "funding_fit_A": {
+  "fitted_A206": {
+   "name": "A_fitted_A206",
+   "net": 2.07,
+   "t": 1.39,
+   "dd": -48.1,
+   "worst_abs": -19.01,
+   "fee_mo": 0.4,
+   "timein": 53.0,
+   "worst_win": -32.17
+  },
+  "const_binance": {
+   "name": "A_const_binance",
+   "net": 1.94,
+   "t": 1.3,
+   "dd": -48.5,
+   "worst_abs": -19.08,
+   "fee_mo": 0.4,
+   "timein": 53.0,
+   "worst_win": -32.3
+  },
+  "const_avgvenue": {
+   "name": "A_const_avgvenue",
+   "net": 1.91,
+   "t": 1.28,
+   "dd": -48.6,
+   "worst_abs": -19.09,
+   "fee_mo": 0.4,
+   "timein": 53.0,
+   "worst_win": -32.32
+  },
+  "realized_binance": {
+   "name": "A_realized_binance",
+   "net": 1.95,
+   "t": 1.29,
+   "dd": -47.4,
+   "worst_abs": -18.83,
+   "fee_mo": 0.4,
+   "timein": 53.0,
+   "worst_win": -32.79
+  },
+  "realized_avgvenue": {
+   "name": "A_realized_avgvenue",
+   "net": 1.95,
+   "t": 1.29,
+   "dd": -47.5,
+   "worst_abs": -18.82,
+   "fee_mo": 0.4,
+   "timein": 53.0,
+   "worst_win": -32.71
+  }
+ },
+ "bar_A": {
+  "fee_free": {
+   "name": "A_feefree",
+   "net": 2.47,
+   "t": 1.67,
+   "dd": -47.1,
+   "worst_abs": -18.79,
+   "fee_mo": 0.4,
+   "timein": 53.0,
+   "worst_win": -31.76,
+   "fee_free_net": 2.89
+  },
+  "fee_only": {
+   "name": "A_feeonly",
+   "net": 2.47,
+   "t": 1.67,
+   "dd": -47.1,
+   "worst_abs": -18.79,
+   "fee_mo": 0.4,
+   "timein": 53.0,
+   "worst_win": -31.76,
+   "fee_free_net": 2.89
+  }
+ },
+ "bar_gated": {
+  "fitted_A206": {
+   "name": "GATED_fitted_A206",
+   "net": 2.57,
+   "t": 1.23,
+   "dd": -35.3,
+   "worst_abs": -16.53,
+   "fee_mo": 0.22,
+   "timein": 34.0,
+   "worst_win": -47.61
+  },
+  "const_binance": {
+   "name": "GATED_const_binance",
+   "net": 2.49,
+   "t": 1.19,
+   "dd": -35.5,
+   "worst_abs": -16.62,
+   "fee_mo": 0.22,
+   "timein": 34.0,
+   "worst_win": -47.66
+  },
+  "const_avgvenue": {
+   "name": "GATED_const_avgvenue",
+   "net": 2.47,
+   "t": 1.18,
+   "dd": -35.5,
+   "worst_abs": -16.64,
+   "fee_mo": 0.22,
+   "timein": 34.0,
+   "worst_win": -47.66
+  },
+  "realized_binance": {
+   "name": "GATED_realized_binance",
+   "net": 2.41,
+   "t": 1.14,
+   "dd": -35.2,
+   "worst_abs": -16.4,
+   "fee_mo": 0.22,
+   "timein": 34.0,
+   "worst_win": -48.04
+  },
+  "realized_avgvenue": {
+   "name": "GATED_realized_avgvenue",
+   "net": 2.4,
+   "t": 1.14,
+   "dd": -35.3,
+   "worst_abs": -16.42,
+   "fee_mo": 0.22,
+   "timein": 34.0,
+   "worst_win": -47.98
+  }
+ },
+ "bar_retention": {
+  "fee_only": {
+   "center": 2.83,
+   "shift2": 2.71,
+   "retention": 0.667
+  },
+  "by_convention": {
+   "fitted_A206": {
+    "A": 2.07,
+    "center": 2.57
+   },
+   "const_binance": {
+    "A": 1.94,
+    "center": 2.49
+   },
+   "const_avgvenue": {
+    "A": 1.91,
+    "center": 2.47
+   },
+   "realized_binance": {
+    "A": 1.95,
+    "center": 2.41
+   },
+   "realized_avgvenue": {
+    "A": 1.95,
+    "center": 2.4
+   }
+  }
+ },
+ "engine_A_validation": {
+  "final_eq": 126415.52922994258,
+  "stored": 126415.52923,
+  "abs_delta": 5.74218574911356e-08,
+  "pos_identical": true
+ },
+ "jitter_076c": [
+  {
+   "days": 25.5,
+   "thr": 0.9,
+   "net": 3.02,
+   "t": 1.53,
+   "fh": 2.15,
+   "sh": 3.85,
+   "dd": -33.9,
+   "fee": 0.24
+  },
+  {
+   "days": 25.5,
+   "thr": 1.0,
+   "net": 3.02,
+   "t": 1.53,
+   "fh": 2.15,
+   "sh": 3.85,
+   "dd": -33.9,
+   "fee": 0.24
+  },
+  {
+   "days": 25.5,
+   "thr": 1.1,
+   "net": 3.02,
+   "t": 1.53,
+   "fh": 2.15,
+   "sh": 3.85,
+   "dd": -33.9,
+   "fee": 0.24
+  },
+  {
+   "days": 34.5,
+   "thr": 0.9,
+   "net": 2.06,
+   "t": 0.95,
+   "fh": 0.49,
+   "sh": 3.58,
+   "dd": -41.6,
+   "fee": 0.24
+  },
+  {
+   "days": 34.5,
+   "thr": 1.0,
+   "net": 2.06,
+   "t": 0.95,
+   "fh": 0.49,
+   "sh": 3.58,
+   "dd": -41.6,
+   "fee": 0.24
+  },
+  {
+   "days": 34.5,
+   "thr": 1.1,
+   "net": 2.06,
+   "t": 0.95,
+   "fh": 0.49,
+   "sh": 3.58,
+   "dd": -41.6,
+   "fee": 0.24
+  }
+ ],
+ "engine_shift2": {
+  "net": 2.8,
+  "t": 1.35,
+  "retention_vs_A": 1.0
+ },
+ "jitter_A": [
+  {
+   "lab": "atr085",
+   "net": 2.65,
+   "t": 1.62,
+   "fh": 2.97,
+   "sh": 2.33,
+   "dd": -44.7,
+   "fee": 0.43
+  },
+  {
+   "lab": "atr115",
+   "net": 3.4,
+   "t": 2.42,
+   "fh": 3.47,
+   "sh": 3.33,
+   "dd": -49.6,
+   "fee": 0.37
+  },
+  {
+   "lab": "chan163",
+   "net": 3.23,
+   "t": 1.95,
+   "fh": 3.29,
+   "sh": 3.17,
+   "dd": -49.5,
+   "fee": 0.45
+  },
+  {
+   "lab": "chan221",
+   "net": 1.63,
+   "t": 1.14,
+   "fh": 1.37,
+   "sh": 1.89,
+   "dd": -49.9,
+   "fee": 0.37
+  },
+  {
+   "lab": "pctl050",
+   "net": 2.15,
+   "t": 1.25,
+   "fh": 2.76,
+   "sh": 1.55,
+   "dd": -43.7,
+   "fee": 0.35
+  },
+  {
+   "lab": "pctl080",
+   "net": 1.74,
+   "t": 1.18,
+   "fh": 1.63,
+   "sh": 1.84,
+   "dd": -47.8,
+   "fee": 0.43
+  }
+ ],
+ "results": {
+  "A": {
+   "name": "engine_A",
+   "free": {
+    "name": "engine_A_free",
+    "mean_excess_pct_mo": 2.89,
+    "t": 1.96,
+    "worst_window_pct": -31.39,
+    "best_window_pct": 31.6,
+    "first_half_pct": 2.9,
+    "second_half_pct": 2.87,
+    "concentration": 0.17,
+    "neg_windows": 25,
+    "n_windows": 63,
+    "continuous_dd_pct": -46.2,
+    "july26_partial_pct": -9.98,
+    "time_in_pct": 53.0,
+    "worst_absolute_month_pct": -18.47
+   },
+   "net": {
+    "name": "engine_A_net",
+    "mean_excess_pct_mo": 2.47,
+    "t": 1.67,
+    "worst_window_pct": -31.75,
+    "best_window_pct": 30.98,
+    "first_half_pct": 2.48,
+    "second_half_pct": 2.47,
+    "concentration": 0.2,
+    "neg_windows": 27,
+    "n_windows": 63,
+    "continuous_dd_pct": -47.1,
+    "july26_partial_pct": -10.68,
+    "time_in_pct": 53.0,
+    "worst_absolute_month_pct": -18.8
+   },
+   "fee_mo": 0.4,
+   "funding_net": {
+    "fitted_A206": 1.72,
+    "const_binance": 1.48,
+    "const_avgvenue": 1.44,
+    "realized_binance": 1.71,
+    "realized_avgvenue": 1.69
+   },
+   "soft": 2.699,
+   "final_eq": 126415.52922994258
+  },
+  "C": {
+   "name": "engine_076c",
+   "free": {
+    "name": "engine_076c_free",
+    "mean_excess_pct_mo": 3.05,
+    "t": 1.47,
+    "worst_window_pct": -47.23,
+    "best_window_pct": 44.69,
+    "first_half_pct": 2.08,
+    "second_half_pct": 3.99,
+    "concentration": 0.23,
+    "neg_windows": 24,
+    "n_windows": 63,
+    "continuous_dd_pct": -34.2,
+    "july26_partial_pct": -20.19,
+    "time_in_pct": 34.0,
+    "worst_absolute_month_pct": -16.03
+   },
+   "net": {
+    "name": "engine_076c_net",
+    "mean_excess_pct_mo": 2.8,
+    "t": 1.35,
+    "worst_window_pct": -47.46,
+    "best_window_pct": 44.69,
+    "first_half_pct": 1.85,
+    "second_half_pct": 3.72,
+    "concentration": 0.25,
+    "neg_windows": 24,
+    "n_windows": 63,
+    "continuous_dd_pct": -34.8,
+    "july26_partial_pct": -20.59,
+    "time_in_pct": 34.0,
+    "worst_absolute_month_pct": -16.23
+   },
+   "fee_mo": 0.24,
+   "funding_net": {
+    "fitted_A206": 2.04,
+    "const_binance": 1.8,
+    "const_avgvenue": 1.76,
+    "realized_binance": 2.06,
+    "realized_avgvenue": 2.04
+   },
+   "soft": 2.663,
+   "final_eq": 171979.22488609733
+  }
+ }
+}
