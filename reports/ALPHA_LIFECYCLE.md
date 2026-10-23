@@ -12,7 +12,7 @@ flowchart TD
     F -- "any fail" --> L["FAILURE LEDGER<br/>never retested without a NEW mechanism story"]
     F -- "all pass" --> X{"ENTRY EXAM v3.2<br/>per-month soft scores, anchored allowance θ×BMU<br/>2x slope beyond, 3x deep, one priced freak"}
     X -- "score < anchor reference line" --> L
-    X -- "score ≥ admission" --> A[("ACCEPTED ALPHA<br/>pool member")]
+    X -- "score ≥ admission" --> A[("ACCEPTED ALPHA<br/>SUCCESS REGISTRY = pool manifest<br/>each entry is the alpha's certificate:<br/>frozen params · grades · provenance · chain")]
     A --> S["STATIC BOOK<br/>simplex allocation over standalone-positive recruits<br/>NO routing — frozen 2026-10-20 after three lawful kills"]
     S --> B{"BOOK EXAM<br/>same floors + soft scores at book level"}
     B -- fail --> L
@@ -20,7 +20,7 @@ flowchart TD
     W -- fail --> L
     W -- pass --> H["HOLDOUT READOUT<br/>the sealed months — the one test nobody trained on"]
     H -- fail --> L
-    H -- "holds" --> P["APPROVED DEPLOYABLE STRATEGY<br/>single alpha, gated alpha, or static book"]
+    H -- "holds" --> P["APPROVED DEPLOYABLE STRATEGY<br/>PRODUCTION REGISTRY entry: approved config,<br/>rails, deployment state, holdout readout"]
     P --> Z["DEPLOYMENT PREP<br/>rails re-derived on real numbers (field-unverified tag)<br/>paper pilot at 1x · fills-vs-model logging"]
     Z --> LIVE["LIVE<br/>+ shadow monitors: JEV · depth · funding recorder"]
     JEV["JEV shadow log (live-only)<br/>LLM backtests are hindsight-contaminated"] -.->|"graded vs always-on + dumb gates<br/>before ANY advisory role"| LIVE
@@ -38,5 +38,10 @@ flowchart TD
   simplex reopens automatically; adaptive routing stays buried absent new evidence.
 - **Holdout discipline**: the sealed months are read once, on the frozen configuration. They are
   the transition from "accepted" to "approved."
-- **Everything measurable passes through one ruler** (`stats_canonical`); generation is
-  delegated (loop, DS, JEV), measurement is centralized, judgment is by law.
+- **Where successes live**: the **pool manifest** (`data/precompute/manifest.json`) is the
+  machine-readable success registry — every accepted alpha's entry is its certificate (frozen
+  params, canonical grades, provenance, supersession chain — see alpha_076a replacing 076).
+  **Approved deployables** get a production-registry entry (approved configuration, rails,
+  holdout readout). The narrative ledger records both, but the manifests are the durable
+  certificates. Failures need their dedicated ledger because they otherwise evaporate;
+  successes persist structurally — in the manifest, the code, and the deployed config.
