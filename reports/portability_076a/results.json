@@ -1,0 +1,242 @@
+{
+ "run": "alpha_076a portability readout (operator-directed canonical run)",
+ "date": "2026-10-23",
+ "engine": "fast path, fund_pct injection seam, decide@close fill@next-open, 2x rails, allow_shorts=False, engine fee=0.0",
+ "costs": "fee 0.0008 netted on |dpos| + funding at 00/08/16 UTC boundaries",
+ "ruler": "tools/stats_canonical.grade, bench = same-asset buy-hold",
+ "formula_md5": "137ce302a6c4",
+ "params_frozen": {
+  "atr_period": 14,
+  "atr_stop_mult": 50.0,
+  "atr_take_mult": 50.0,
+  "funding_gate_mode": "formula",
+  "funding_gate_pctl": 0.7,
+  "funding_input": "binance",
+  "long_threshold": 0.5,
+  "max_position_pct": 1.0,
+  "short_threshold": 0.55,
+  "signal_exit_threshold": 0.5,
+  "signal_smoothing": 1,
+  "use_bias_filter": false,
+  "use_funding_gate": true,
+  "warmup_candles": 100
+ },
+ "eth_path_validation": {
+  "position_agreement_vs_stored_pct": 100.0
+ },
+ "assets": {
+  "ETH": {
+   "symbol": "ETH/USDT",
+   "funding_gate_source": "binance settled proxy (binance_ETHUSDT_funding_proxy_202101_202610.csv)",
+   "funding_cost_source": "binance+bybit avg (binance_ETHUSDT_funding_proxy_202101_202610.csv; bybit_ETHUSDT_funding_202101_202610.csv)",
+   "guard_release": {
+    "feefree": null,
+    "netted": null,
+    "netfund": null
+   },
+   "feefree": {
+    "name": "076a_ETH_feefree",
+    "mean_excess_pct_mo": 2.89,
+    "t": 1.96,
+    "worst_window_pct": -31.39,
+    "best_window_pct": 31.6,
+    "first_half_pct": 2.9,
+    "second_half_pct": 2.87,
+    "concentration": 0.17,
+    "neg_windows": 25,
+    "n_windows": 63,
+    "continuous_dd_pct": -46.2,
+    "july26_partial_pct": -9.98,
+    "time_in_pct": 53.0,
+    "worst_absolute_month_pct": -18.47
+   },
+   "netted": {
+    "name": "076a_ETH_netted",
+    "mean_excess_pct_mo": 2.47,
+    "t": 1.67,
+    "worst_window_pct": -31.75,
+    "best_window_pct": 30.98,
+    "first_half_pct": 2.48,
+    "second_half_pct": 2.47,
+    "concentration": 0.2,
+    "neg_windows": 27,
+    "n_windows": 63,
+    "continuous_dd_pct": -47.1,
+    "july26_partial_pct": -10.68,
+    "time_in_pct": 53.0,
+    "worst_absolute_month_pct": -18.8
+   },
+   "netfund": {
+    "name": "076a_ETH_netfund",
+    "mean_excess_pct_mo": 1.95,
+    "t": 1.29,
+    "worst_window_pct": -32.7,
+    "best_window_pct": 28.29,
+    "first_half_pct": 1.87,
+    "second_half_pct": 2.02,
+    "concentration": 0.23,
+    "neg_windows": 29,
+    "n_windows": 63,
+    "continuous_dd_pct": -47.5,
+    "july26_partial_pct": -10.98,
+    "time_in_pct": 53.0,
+    "worst_absolute_month_pct": -18.83
+   },
+   "fee_mo_pct": 0.4
+  },
+  "BTC": {
+   "symbol": "BTC/USDT",
+   "funding_gate_source": "binance settled proxy (binance_BTCUSDT_funding_proxy_202101_202610.csv)",
+   "funding_cost_source": "binance only (binance_BTCUSDT_funding_proxy_202101_202610.csv)",
+   "guard_release": {
+    "feefree": null,
+    "netted": null,
+    "netfund": null
+   },
+   "feefree": {
+    "name": "076a_BTC_feefree",
+    "mean_excess_pct_mo": -1.4,
+    "t": -1.02,
+    "worst_window_pct": -39.67,
+    "best_window_pct": 28.41,
+    "first_half_pct": 1.16,
+    "second_half_pct": -3.89,
+    "concentration": null,
+    "neg_windows": 38,
+    "n_windows": 63,
+    "continuous_dd_pct": -52.7,
+    "july26_partial_pct": -12.15,
+    "time_in_pct": 49.0,
+    "worst_absolute_month_pct": -17.98
+   },
+   "netted": {
+    "name": "076a_BTC_netted",
+    "mean_excess_pct_mo": -1.85,
+    "t": -1.34,
+    "worst_window_pct": -39.83,
+    "best_window_pct": 28.12,
+    "first_half_pct": 0.7,
+    "second_half_pct": -4.33,
+    "concentration": null,
+    "neg_windows": 38,
+    "n_windows": 63,
+    "continuous_dd_pct": -59.5,
+    "july26_partial_pct": -12.77,
+    "time_in_pct": 49.0,
+    "worst_absolute_month_pct": -18.5
+   },
+   "netfund": {
+    "name": "076a_BTC_netfund",
+    "mean_excess_pct_mo": -2.19,
+    "t": -1.58,
+    "worst_window_pct": -39.89,
+    "best_window_pct": 27.96,
+    "first_half_pct": 0.25,
+    "second_half_pct": -4.55,
+    "concentration": null,
+    "neg_windows": 40,
+    "n_windows": 63,
+    "continuous_dd_pct": -65.4,
+    "july26_partial_pct": -12.96,
+    "time_in_pct": 49.0,
+    "worst_absolute_month_pct": -18.55
+   },
+   "fee_mo_pct": 0.45
+  },
+  "SOL": {
+   "symbol": "SOL/USDT",
+   "funding_gate_source": "binance settled proxy (binance_SOLUSDT_funding_proxy_202101_202610.csv)",
+   "funding_cost_source": "binance only (binance_SOLUSDT_funding_proxy_202101_202610.csv)",
+   "guard_release": {
+    "feefree": {
+     "released_values_pct": [
+      -185.83
+     ],
+     "windows": [
+      {
+       "month": "2021-08",
+       "excess_pct": -185.83,
+       "strat_pct": 16.68,
+       "bench_pct": 202.52
+      }
+     ]
+    },
+    "netted": {
+     "released_values_pct": [
+      -186.21
+     ],
+     "windows": [
+      {
+       "month": "2021-08",
+       "excess_pct": -186.21,
+       "strat_pct": 16.31,
+       "bench_pct": 202.52
+      }
+     ]
+    },
+    "netfund": {
+     "released_values_pct": [
+      -187.29
+     ],
+     "windows": [
+      {
+       "month": "2021-08",
+       "excess_pct": -187.29,
+       "strat_pct": 15.23,
+       "bench_pct": 202.52
+      }
+     ]
+    }
+   },
+   "feefree": {
+    "name": "076a_SOL_feefree",
+    "mean_excess_pct_mo": -4.44,
+    "t": -1.1,
+    "worst_window_pct": -185.83,
+    "best_window_pct": 63.48,
+    "first_half_pct": -6.8,
+    "second_half_pct": -2.17,
+    "concentration": null,
+    "neg_windows": 32,
+    "n_windows": 63,
+    "continuous_dd_pct": -84.1,
+    "july26_partial_pct": -11.76,
+    "time_in_pct": 51.0,
+    "worst_absolute_month_pct": -38.04
+   },
+   "netted": {
+    "name": "076a_SOL_netted",
+    "mean_excess_pct_mo": -4.83,
+    "t": -1.19,
+    "worst_window_pct": -186.21,
+    "best_window_pct": 63.14,
+    "first_half_pct": -7.2,
+    "second_half_pct": -2.54,
+    "concentration": null,
+    "neg_windows": 32,
+    "n_windows": 63,
+    "continuous_dd_pct": -85.0,
+    "july26_partial_pct": -12.47,
+    "time_in_pct": 51.0,
+    "worst_absolute_month_pct": -38.53
+   },
+   "netfund": {
+    "name": "076a_SOL_netfund",
+    "mean_excess_pct_mo": -5.17,
+    "t": -1.27,
+    "worst_window_pct": -187.29,
+    "best_window_pct": 64.33,
+    "first_half_pct": -7.55,
+    "second_half_pct": -2.86,
+    "concentration": null,
+    "neg_windows": 32,
+    "n_windows": 63,
+    "continuous_dd_pct": -85.6,
+    "july26_partial_pct": -12.55,
+    "time_in_pct": 51.0,
+    "worst_absolute_month_pct": -38.51
+   },
+   "fee_mo_pct": 0.4
+  }
+ }
+}
