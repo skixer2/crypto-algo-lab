@@ -1,0 +1,224 @@
+{
+ "run": "alpha_076a ETH HOLDOUT READOUT (the seal) \u2014 operator-directed, one-shot",
+ "date": "2026-10-23",
+ "definition": "post-GRID segment of the ETH cache 2026-07-01 -> 2026-09-28; Jul = ruler JULY tuple partial [07-01, 07-28); Aug full; Sep partial to cache end [09-01, 09-28). GRID 2021-04..2026-06 not re-graded, not touched.",
+ "bar_pre_registered": "PASS = holdout mean excess > 0 AND worst holdout (absolute, strat) month >= -40",
+ "engine": "tools/portability_076a.py path imported verbatim (engine_run, funding plumbing, netting_on_curve); END extended to cache end; decide@close fill@next-open, 2x rails 50/50 (effectively off), allow_shorts=False, engine fee=0.0, warmup CLOSED",
+ "costs": "headline netfund: fee 0.0008 netted on |dpos| + funding at 00/08/16 UTC bars (ETH production convention: gate binance settled proxy, cost binance+bybit avg)",
+ "ruler": "tools/stats_canonical machinery on holdout windows; bench = same-asset buy-hold close",
+ "formula_md5": "137ce302a6c4",
+ "params_frozen": {
+  "atr_period": 14,
+  "atr_stop_mult": 50.0,
+  "atr_take_mult": 50.0,
+  "funding_gate_mode": "formula",
+  "funding_gate_pctl": 0.7,
+  "funding_input": "binance",
+  "long_threshold": 0.5,
+  "max_position_pct": 1.0,
+  "short_threshold": 0.55,
+  "signal_exit_threshold": 0.5,
+  "signal_smoothing": 1,
+  "use_bias_filter": false,
+  "use_funding_gate": true,
+  "warmup_candles": 100
+ },
+ "seal": {
+  "seal_date": "2026-07-28 00:00:00+00:00",
+  "flag": "/home/node/.openclaw/workspace/crypto/tuner/.holdout_final_run",
+  "flag_created_at_utc": "2026-10-23T15:07:33Z",
+  "discipline": "one-shot: flag deleted immediately after the single engine run; guard re-arms (checks flag on disk)",
+  "flag_deleted_at_utc": "2026-10-23T15:07:53Z",
+  "engine_run_executed_once": true
+ },
+ "validation_gate": {
+  "manifest_grade": {
+   "mean_exc": 2.89,
+   "t": 1.96,
+   "worst_abs_month": -18.47,
+   "dd": -46.2
+  },
+  "run_grade": {
+   "mean_excess_pct_mo": 2.89,
+   "t": 1.96,
+   "continuous_dd_pct": -46.2,
+   "worst_absolute_month_pct": -18.47,
+   "july26_partial_pct": -9.98,
+   "time_in_pct": 54.0
+  },
+  "checks": {
+   "mean_exc": true,
+   "t": true,
+   "dd": true,
+   "worst_abs": true
+  },
+  "PASS": true
+ },
+ "diagnostic_pos_agreement_vs_portability_pct": 100.0,
+ "gate_states_holdout": {
+  "definition": "fund_pct (30d rolling pctl-rank, binance settled proxy) on holdout decision bars; gate open = fund_pct < 0.7 (entry eligible); gate applies at ENTRY only, exit never gated",
+  "bars": 8545,
+  "open_pct": 61.1,
+  "closed_pct": 38.9,
+  "nan_pct": 0.0,
+  "fund_pct_mean": 0.564,
+  "fund_pct_min": 0.0,
+  "fund_pct_max": 1.0
+ },
+ "holdout_netfund": {
+  "book": "netfund (fee+funding, headline)",
+  "windows": [
+   {
+    "window": "2026-07_partial_JULY_tuple",
+    "start": "2026-07-01 00:00:00+00:00",
+    "end": "2026-07-28 00:00:00+00:00",
+    "strat_pct": 9.24,
+    "bench_pct": 20.22,
+    "excess_pct": -10.98,
+    "strat_frac": 0.092395,
+    "bench_frac": 0.202155,
+    "excess_frac": -0.10976
+   },
+   {
+    "window": "2026-08",
+    "start": "2026-08-01 00:00:00+00:00",
+    "end": "2026-09-01 00:00:00+00:00",
+    "strat_pct": 21.52,
+    "bench_pct": 32.32,
+    "excess_pct": -10.8,
+    "strat_frac": 0.215217,
+    "bench_frac": 0.323185,
+    "excess_frac": -0.107968
+   },
+   {
+    "window": "2026-09_to_cache_end",
+    "start": "2026-09-01 00:00:00+00:00",
+    "end": "2026-09-28 00:00:00+00:00",
+    "strat_pct": -1.13,
+    "bench_pct": 8.75,
+    "excess_pct": -9.88,
+    "strat_frac": -0.011305,
+    "bench_frac": 0.087491,
+    "excess_frac": -0.098796
+   }
+  ],
+  "mean_excess_pct": -10.55,
+  "mean_excess_frac": -0.105508,
+  "worst_absolute_month_pct": -1.13,
+  "worst_absolute_month_frac": -0.011305,
+  "worst_excess_pct": -10.98,
+  "best_excess_pct": -9.88,
+  "continuous_dd_pct_in_holdout": -13.1,
+  "bench_continuous_dd_pct_in_holdout": -9.7,
+  "time_in_pct": 68.6,
+  "latch_entries_in_holdout": 11,
+  "latch_exits_in_holdout": 11,
+  "carried_in_position_at_holdout_start": true
+ },
+ "holdout_feefree": {
+  "book": "feefree (disclosed)",
+  "windows": [
+   {
+    "window": "2026-07_partial_JULY_tuple",
+    "start": "2026-07-01 00:00:00+00:00",
+    "end": "2026-07-28 00:00:00+00:00",
+    "strat_pct": 10.24,
+    "bench_pct": 20.22,
+    "excess_pct": -9.98,
+    "strat_frac": 0.102398,
+    "bench_frac": 0.202155,
+    "excess_frac": -0.099756
+   },
+   {
+    "window": "2026-08",
+    "start": "2026-08-01 00:00:00+00:00",
+    "end": "2026-09-01 00:00:00+00:00",
+    "strat_pct": 22.52,
+    "bench_pct": 32.32,
+    "excess_pct": -9.8,
+    "strat_frac": 0.225179,
+    "bench_frac": 0.323185,
+    "excess_frac": -0.098007
+   },
+   {
+    "window": "2026-09_to_cache_end",
+    "start": "2026-09-01 00:00:00+00:00",
+    "end": "2026-09-28 00:00:00+00:00",
+    "strat_pct": -0.38,
+    "bench_pct": 8.75,
+    "excess_pct": -9.13,
+    "strat_frac": -0.003784,
+    "bench_frac": 0.087491,
+    "excess_frac": -0.091275
+   }
+  ],
+  "mean_excess_pct": -9.63,
+  "mean_excess_frac": -0.096346,
+  "worst_absolute_month_pct": -0.38,
+  "worst_absolute_month_frac": -0.003784,
+  "worst_excess_pct": -9.98,
+  "best_excess_pct": -9.13,
+  "continuous_dd_pct_in_holdout": -12.6,
+  "bench_continuous_dd_pct_in_holdout": -9.7,
+  "time_in_pct": 68.6,
+  "latch_entries_in_holdout": 11,
+  "latch_exits_in_holdout": 11,
+  "carried_in_position_at_holdout_start": true
+ },
+ "holdout_netted": {
+  "book": "netted fees only (disclosed)",
+  "windows": [
+   {
+    "window": "2026-07_partial_JULY_tuple",
+    "start": "2026-07-01 00:00:00+00:00",
+    "end": "2026-07-28 00:00:00+00:00",
+    "strat_pct": 9.54,
+    "bench_pct": 20.22,
+    "excess_pct": -10.68,
+    "strat_frac": 0.09536,
+    "bench_frac": 0.202155,
+    "excess_frac": -0.106795
+   },
+   {
+    "window": "2026-08",
+    "start": "2026-08-01 00:00:00+00:00",
+    "end": "2026-09-01 00:00:00+00:00",
+    "strat_pct": 21.93,
+    "bench_pct": 32.32,
+    "excess_pct": -10.39,
+    "strat_frac": 0.219312,
+    "bench_frac": 0.323185,
+    "excess_frac": -0.103873
+   },
+   {
+    "window": "2026-09_to_cache_end",
+    "start": "2026-09-01 00:00:00+00:00",
+    "end": "2026-09-28 00:00:00+00:00",
+    "strat_pct": -0.93,
+    "bench_pct": 8.75,
+    "excess_pct": -9.68,
+    "strat_frac": -0.009327,
+    "bench_frac": 0.087491,
+    "excess_frac": -0.096818
+   }
+  ],
+  "mean_excess_pct": -10.25,
+  "mean_excess_frac": -0.102495,
+  "worst_absolute_month_pct": -0.93,
+  "worst_absolute_month_frac": -0.009327,
+  "worst_excess_pct": -10.68,
+  "best_excess_pct": -9.68,
+  "continuous_dd_pct_in_holdout": -13.0,
+  "bench_continuous_dd_pct_in_holdout": -9.7,
+  "time_in_pct": 68.6,
+  "latch_entries_in_holdout": 11,
+  "latch_exits_in_holdout": 11,
+  "carried_in_position_at_holdout_start": true
+ },
+ "percent_boundary_audit_out_of_band": null,
+ "bar_verdict": {
+  "mean_excess_gt_0": "FAIL",
+  "worst_abs_month_gte_minus40": "PASS",
+  "HOLDOUT": "FAIL"
+ }
+}
