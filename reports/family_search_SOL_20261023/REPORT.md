@@ -65,8 +65,12 @@ DD −85.6, worst_abs −38.51, halves −7.55/−2.86). Divergence ⇒ abort, n
 - **Jitter ±15%**, one-at-a-time, 6 neighbors (N→round(N·0.85)/round(N·1.15);
   buf→±15%; gate→±15%): all 6 sign-stable (`mean_excess_pct_mo > 0`) **and**
   halves ≥ 0.
-- **Shift-2 retention ≥ 0.25** — position shifted 2 bars, same cost overlay;
-  retention = shift-2 mean excess / center mean excess (genuine shift, not no-op).
+- **Shift-2 retention ≥ 0.25** — genuine relabel: the decision/event series is
+  shifted 2 bars INSIDE the formula and the engine re-runs with identical costs
+  (r3 / btc_stress relabel convention); retention = shift-2 mean excess / center
+  mean excess. *(Pre-run amendment 2026-10-23, committed before the run: the
+  portability-style cost-overlay-only shift was rejected — it keeps the original
+  PnL stream under the shifted position's costs, an incoherent book.)*
 - **Anchored exam v3.2 soft scores** (theta **0.598**, sigma **0.22** — frozen
   verbatim as instructed) on the netfund monthly excesses vs the **SAME-ASSET
   raw-latch anchor**: same family (turtle latch), same (N, buf), **without funding
@@ -89,4 +93,44 @@ DD −85.6, worst_abs −38.51, halves −7.55/−2.86). Divergence ⇒ abort, n
 
 ## RESULTS (filled after the run — pre-registration above untouched)
 
-*pending*
+**Run metadata:** template md5 `137ce302a6c4` (== portability-run formula md5).
+Path-validation gate: center config (N192/b1.0/g0.7) reproduced the portability
+SOL netfund row **to the digit** (−5.17 / t −1.27 / DD −85.6 / worst −38.51 /
+halves −7.55/−2.86) → MATCH, search proceeded. 27/27 grid runs completed, EXIT=0,
+~10 min wall. GuardRelease fired on SOL out-of-band window extremes
+(portability-precedent, disclosed in results.json per book).
+Disclosed: `sigma_m(SOL bench) = 0.4332` (frozen σ 0.22 used verbatim per brief;
+anchor exam not reached — no survivors).
+
+## VERDICT (pre-registered branch): **none → ledgered no-pass**
+
+**SCREEN: 0/27 survivors.** Phase 2 (jitter / shift-2 / anchored exam) not
+executed — no config passed the screen. Survivor curves: none exist (curves/ is
+intentionally empty).
+
+### Floor pass counts (headline netfund book, 27 configs)
+
+| floor | pass |
+|---|---|
+| OOS sign > 0 | **0 / 27** |
+| worst absolute month ≥ −40 | 27 / 27 |
+| both halves ≥ 0 | **0 / 27** |
+
+### Full grid (mean excess %/mo per cell; every row failed floors 1+3)
+
+| N \ buf | 0.85 | 1.0 | 1.15 |
+|---|---|---|---|
+| **gate 0.5** | −5.00 / −5.65 / −5.40 | −5.18 / −5.22 / −4.96 | −4.62 / −4.83 / −5.07 |
+| **gate 0.7** | −4.65 / −4.70 / −4.71 | −5.35 / −5.17 / −4.95 | −3.96 / −3.99 / −4.24 |
+| **gate 0.8** | −4.19 / −4.51 / −4.43 | −5.59 / −4.56 / −4.26 | −3.87 / −3.68 / −3.99 |
+
+(cells = N ∈ {144, 192, 288} left→right; t ∈ [−0.99, −1.38] across the grid;
+worst absolute month ∈ [−38.97, −24.0]; DD ∈ [−87.9, −64.0]; full per-config
+rows in `grid.csv`, verbatim 3-book grades in `results.json`.)
+
+**Range across the entire family: mean excess −3.68 … −5.65 %/mo; both halves
+negative in all 27 configs.** No parameter region of the 076a family (channel
+length × ATR buffer × funding-gate percentile) is standalone-positive on
+SOL-USDT 15m under the canonical conventions. Per the pre-registered outcomes:
+ledgered **no-pass**; ETH holdout path unaffected; new mechanisms for SOL arrive
+as separate idea cards.
