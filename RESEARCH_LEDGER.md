@@ -197,3 +197,10 @@ DEPLOYMENT LAYER (distinct): live rails v0 PROVISIONAL field-unverified (de-risk
 - Pattern: 4th independent read of the same disease (exam-window +2.89 vs holdout −10.55; BTC family recent-half −4.55; blend-era July −9.4 in +18% bull). Latch-family edge absent in the 2026 regime. 076a → failure ledger, HOLDOUT-FAIL, full honors.
 - PROPOSED STANDING AMENDMENT (JP to confirm): any future candidate must show positive excess in the 2024+ recent-regime subwindow (in-sample) before any seal-grade battery — the era where every kill today died.
 - Day totals: 5 honest kills at zero live cost (076c supersede, BTC-gate magnitude, BTC family 0/27, SOL family 0/27, 076a seal). Constitution worked exactly as designed.
+
+### 2026-10-25 16:0x UTC — OPERATOR OVERRIDE of seal verdict (JP): 076a deploys as LIVE DATA COLLECTION at 1x; scalper replaced
+- JP reasoning (verbatim-ish): 076a (+32% abs paper) beat the live scalper (+1.3%) over the seal quarter; alphas are allowed to fail sometimes; the holdout window was exceptionally strange (+70.6% ETH quarter); final tests shouldn't be one extreme interval. Decision: replace the live ETH strategy with 076a and collect REAL trading data.
+- Ledger integrity: holdout-fail verdict STANDS as the law's output (bar was pre-registered 15:0x). This entry = owner authority exercised with eyes open. Deployment class: LIVE DATA COLLECTION, not APPROVED DEPLOYABLE (lifecycle chart unchanged).
+- Standing constraints honored: venue = OKX sub-account, 1x only (JP 2026-10-08 rule). Long-only latch, formula-faithful (channel 192, ATR96 x1.0, funding gate pctl 0.7, warmup closed, decide@close/fill@next-open).
+- PRE-REGISTERED KILL CRITERIA (proposed to JP with deployment): stop on (a) live equity -30% from switch, or (b) live-vs-model monthly divergence > 5pp unexplained, or (c) JP's word anytime. Data goals: fills-vs-model slippage, funding paid, decision-vs-fill timing, real DD.
+- Scalper: stop runner, close open position at market on switch; its Oct record (+4.7% vs ETH -9.8%) logged; restartable from .bak anytime.
