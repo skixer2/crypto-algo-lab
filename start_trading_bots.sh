@@ -55,7 +55,9 @@ start_bot() {
 }
 
 # Start OKX RSI Scalper Pro v3 (futures, bidirectional, 15m) — rebuilt 2026-09-14 from v2 spec
-start_bot "OKX RSI Scalper Pro" "$BOTS/live_rsi_scalper_okx.py" "live_rsi_scalper_okx.log"
+# 2026-10-25 (JP): scalper retired (restartable from .bak); 076a live data collection at 1x
+start_bot "OKX alpha_076a live" "$BOTS/live_alpha076a_okx.py" "live_076a_runner.log"
+# start_bot "OKX RSI Scalper Pro" "$BOTS/live_rsi_scalper_okx.py" "live_rsi_scalper_okx.log"
 
 # Start Revolut RSI v2 (recovered as compiled bytecode 2026-09-14; source lost)
 start_bot "Revolut RSI v2 trend-filtered" "/home/node/.openclaw/workspace/crypto.pre_dedup_20260918/pyc_archive/live_trading_revolut_v2.pyc" "live_trading_revolut_v2.log"
