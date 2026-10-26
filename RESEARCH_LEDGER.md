@@ -235,3 +235,7 @@ DEPLOYMENT LAYER (distinct): live rails v0 PROVISIONAL field-unverified (de-risk
 - Attribution discovery: equity drift -0.52% while FLAT = ~$55 BTC dust in the sub-account (July v2-era leftover: 0.000689 BTC + 55.8 USDT = 110.64 totalEq) marking with BTC. No strategy impact while flat; noted for model-vs-live comparisons. Options: sweep dust if tradable / exclude from sizing basis. Operator call, no urgency.
 - Loop under new charter: a106/a107/a108 = 3 candidates, 3 honest FAILs (a108: halves +37/-39 = 2024+ door catching regime decay precisely). Species diversity confirmed.
 - weekly-price-check cron: errored (context overflow) — will retarget model on next maintenance pass.
+
+### 2026-10-26 21:30 UTC — BTC dust swept to USDT (JP order)
+- Spot-sold 0.000689 BTC @ ~80,055 (+55.19 USDT, fee 0.055). Account now 110.92 USDT + dust-skeleton 1.8e-9 BTC. Attribution clean from here: every equity move = strategy.
+- Market note: BTC 80k (vs 62.7k July) while ETH 2306 — ETH/BTC divergence regime, consistent with runner's flat discipline.
