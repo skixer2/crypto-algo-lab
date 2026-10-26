@@ -1,0 +1,8 @@
+SCREEN wq101_053 (stats_canonical, engine convention)
+  mean_excess -18.07%/mo | t -6.54 | DD -100.0% | worst_abs_month -25.1%
+  halves -588.0/-635.0 | 2024+ mean excess -19.36%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
