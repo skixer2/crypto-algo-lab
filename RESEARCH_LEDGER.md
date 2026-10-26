@@ -222,3 +222,10 @@ DEPLOYMENT LAYER (distinct): live rails v0 PROVISIONAL field-unverified (de-risk
 - Screen: 15/15 graded FAIL all floors (−1.85…−52.42 %/mo, 2024+ negative everywhere); 3/18 grader-refused by own tripwire (fast sign-flippers → fee churn → implausible window excesses; NOT worked around — correct behavior). 0 floor-passers. Flagship rerun reproduced spot-checks exactly (wq101_054, wq101_101).
 - Meaning delivered: (1) negative control PASSED — famous formulas die on our floors, screen not too soft; (2) portability question answered with a census; (3) economic silence explained: daily-equity horizon logic at 15m + long-only + costs = bleed.
 - Status: library's role = expression language (engine DNA) ONLY; not a source of ready alphas. Commit 12e3600. No follow-up experiments (no re-runs of failures — nothing to retest without a new mechanism story).
+
+### 2026-10-26 15:35 UTC — Classic-TA expedition (7 systems x native/horizon-matched arms): 0/14 — classics dead on ETH 15m
+- Canonical rules verbatim (RSI/Stoch/BB/MACD/Aroon/ADX/OBV), two pre-registered arms each, one run each, screen_candidate only. Flagship rerun reproduced bb_native (-10.23/t-5.09) + aroon_hm (-1.51/t-0.76). Commit d240f4e.
+- Native arm: churn-death — all 7 t NEGATIVE (extractable-against), 93-100% DD, MACD 8023 episodes. Horizon-matched: silence — 26-79 episodes, RSI-hm/ADX-hm NEVER trigger in 5.8y (RSI<30 / ADX>25 at daily-equivalent Wilder smoothing nonexistent on ETH 15m — vol-structure fact, logged). No arm positive 2024+.
+- Flagship prior HALF-WRONG in public: BB-native was the WORST reversion result (not the exception); Aroon dead too. Owned.
+- Note for the drawer: a reliably-negative signal is information (inversion), but harvesting it = new selection on same data + fee asymmetry — only lawful as a fresh pre-registered idea card. Not pursued.
+- Second borrowed-corpus clean negative today (WQ-101 am, classics pm). Own-candidate spend: zero. Verdict line: future use of classics = re-mechanization, not re-parameterization.
