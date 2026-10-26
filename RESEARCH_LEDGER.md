@@ -229,3 +229,9 @@ DEPLOYMENT LAYER (distinct): live rails v0 PROVISIONAL field-unverified (de-risk
 - Flagship prior HALF-WRONG in public: BB-native was the WORST reversion result (not the exception); Aroon dead too. Owned.
 - Note for the drawer: a reliably-negative signal is information (inversion), but harvesting it = new selection on same data + fee asymmetry — only lawful as a fresh pre-registered idea card. Not pursued.
 - Second borrowed-corpus clean negative today (WQ-101 am, classics pm). Own-candidate spend: zero. Verdict line: future use of classics = re-mechanization, not re-parameterization.
+
+### 2026-10-26 20:55 UTC — Runner day-1 report + BTC-dust attribution note
+- 29h live: 0 fills, 116 bars, flat by formula throughout (ETH 2306, needs +2.2% to 48h-high; gate drifted back to 0.79 crowded). No HALT, kill-line untouched.
+- Attribution discovery: equity drift -0.52% while FLAT = ~$55 BTC dust in the sub-account (July v2-era leftover: 0.000689 BTC + 55.8 USDT = 110.64 totalEq) marking with BTC. No strategy impact while flat; noted for model-vs-live comparisons. Options: sweep dust if tradable / exclude from sizing basis. Operator call, no urgency.
+- Loop under new charter: a106/a107/a108 = 3 candidates, 3 honest FAILs (a108: halves +37/-39 = 2024+ door catching regime decay precisely). Species diversity confirmed.
+- weekly-price-check cron: errored (context overflow) — will retarget model on next maintenance pass.
