@@ -1,0 +1,126 @@
+=== ta_rsi_native ===
+SCREEN ta_rsi_native (stats_canonical, engine convention)
+  mean_excess -6.37%/mo | t -2.86 | DD -96.5% | worst_abs_month -30.3%
+  halves -55.5/-153.2 | 2024+ mean excess -7.15%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_rsi_hm ===
+SCREEN ta_rsi_hm (stats_canonical, engine convention)
+  mean_excess -1.85%/mo | t -0.67 | DD 0.0% | worst_abs_month +0.0%
+  halves +0.0/+0.0 | 2024+ mean excess -2.58%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [PASS] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_stoch_native ===
+SCREEN ta_stoch_native (stats_canonical, engine convention)
+  mean_excess -7.42%/mo | t -3.81 | DD -98.6% | worst_abs_month -36.5%
+  halves -125.1/-130.8 | 2024+ mean excess -6.46%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_stoch_hm ===
+SCREEN ta_stoch_hm (stats_canonical, engine convention)
+  mean_excess -2.16%/mo | t -0.97 | DD -71.8% | worst_abs_month -44.7%
+  halves +83.2/-59.2 | 2024+ mean excess -4.64%/mo
+  [FAIL] mean>0
+  [FAIL] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_bb_native ===
+SCREEN ta_bb_native (stats_canonical, engine convention)
+  mean_excess -10.23%/mo | t -5.09 | DD -99.8% | worst_abs_month -39.5%
+  halves -189.2/-323.0 | 2024+ mean excess -11.72%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_bb_hm ===
+SCREEN ta_bb_hm (stats_canonical, engine convention)
+  mean_excess -2.11%/mo | t -0.86 | DD -75.8% | worst_abs_month -35.9%
+  halves +66.2/-15.1 | 2024+ mean excess -3.23%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_macd_native ===
+SCREEN ta_macd_native (stats_canonical, engine convention)
+  mean_excess -19.67%/mo | t -8.87 | DD -100.0% | worst_abs_month -39.5%
+  halves -600.8/-639.3 | 2024+ mean excess -20.07%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_macd_hm ===
+SCREEN ta_macd_hm (stats_canonical, engine convention)
+  mean_excess -1.03%/mo | t -0.63 | DD -64.9% | worst_abs_month -29.6%
+  halves +43.1/+11.4 | 2024+ mean excess -1.59%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [PASS] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_aroon_native ===
+SCREEN ta_aroon_native (stats_canonical, engine convention)
+  mean_excess -11.48%/mo | t -6.34 | DD -99.9% | worst_abs_month -46.4%
+  halves -171.8/-382.7 | 2024+ mean excess -13.24%/mo
+  [FAIL] mean>0
+  [FAIL] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_aroon_hm ===
+SCREEN ta_aroon_hm (stats_canonical, engine convention)
+  mean_excess -1.51%/mo | t -0.76 | DD -78.9% | worst_abs_month -44.7%
+  halves +63.9/+28.2 | 2024+ mean excess -2.14%/mo
+  [FAIL] mean>0
+  [FAIL] worst>=-40
+  [PASS] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_adx_native ===
+SCREEN ta_adx_native (stats_canonical, engine convention)
+  mean_excess -6.22%/mo | t -2.87 | DD -97.3% | worst_abs_month -26.6%
+  halves -143.7/-144.7 | 2024+ mean excess -6.84%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_adx_hm ===
+SCREEN ta_adx_hm (stats_canonical, engine convention)
+  mean_excess -1.85%/mo | t -0.67 | DD 0.0% | worst_abs_month +0.0%
+  halves +0.0/+0.0 | 2024+ mean excess -2.58%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [PASS] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_obv_native ===
+SCREEN ta_obv_native (stats_canonical, engine convention)
+  mean_excess -4.79%/mo | t -2.20 | DD -93.0% | worst_abs_month -27.2%
+  halves -28.9/-42.6 | 2024+ mean excess -4.00%/mo
+  [FAIL] mean>0
+  [PASS] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
+=== ta_obv_hm ===
+SCREEN ta_obv_hm (stats_canonical, engine convention)
+  mean_excess -2.95%/mo | t -1.17 | DD -84.4% | worst_abs_month -40.4%
+  halves -79.8/+43.9 | 2024+ mean excess -1.38%/mo
+  [FAIL] mean>0
+  [FAIL] worst>=-40
+  [FAIL] halves>=0
+  [FAIL] 2024+>0
+VERDICT: FAIL
