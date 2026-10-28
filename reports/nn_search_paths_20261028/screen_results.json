@@ -1,0 +1,37 @@
+[
+ {
+  "name": "nnC_001",
+  "md5": "e71994faad0c26f1f95d24666a3dd28a",
+  "validate": "\"verdict\": \"PASS\"",
+  "screen": "SCREEN nnC_001 (stats_canonical, engine convention)\n  mean_excess -0.53%/mo | t -0.20 | DD -33.8% | worst_abs_month -15.0%\n  halves +88.9/+47.1 | 2024+ mean excess -1.14%/mo\n  [FAIL] mean>0\n  [PASS] worst>=-40\n  [PASS] halves>=0\n  [FAIL] 2024+>0\nVERDICT: FAIL",
+  "err": ""
+ },
+ {
+  "name": "nnC_002",
+  "md5": "d400a581a9b7978617ecea9e2301fc78",
+  "validate": "\"verdict\": \"PASS\"",
+  "screen": "SCREEN nnC_002 (stats_canonical, engine convention)\n  mean_excess -0.91%/mo | t -0.40 | DD -44.1% | worst_abs_month -17.0%\n  halves +17.7/+62.4 | 2024+ mean excess -0.49%/mo\n  [FAIL] mean>0\n  [PASS] worst>=-40\n  [PASS] halves>=0\n  [FAIL] 2024+>0\nVERDICT: FAIL",
+  "err": ""
+ },
+ {
+  "name": "nnC_003",
+  "md5": "650879c85b4907e4dbda84e2293f31f3",
+  "validate": "\"verdict\": \"PASS\"",
+  "screen": "SCREEN nnC_003 (stats_canonical, engine convention)\n  mean_excess -0.77%/mo | t -0.30 | DD -33.0% | worst_abs_month -14.3%\n  halves +20.5/+62.0 | 2024+ mean excess -0.60%/mo\n  [FAIL] mean>0\n  [PASS] worst>=-40\n  [PASS] halves>=0\n  [FAIL] 2024+>0\nVERDICT: FAIL",
+  "err": ""
+ },
+ {
+  "name": "nnC_004",
+  "md5": "2f203ff6722ff27838b96feffcb40044",
+  "validate": "\"verdict\": \"PASS\"",
+  "screen": "SCREEN nnC_004 (stats_canonical, engine convention)\n  mean_excess -1.40%/mo | t -0.60 | DD -53.1% | worst_abs_month -15.6%\n  halves -15.3/+55.2 | 2024+ mean excess -1.10%/mo\n  [FAIL] mean>0\n  [PASS] worst>=-40\n  [FAIL] halves>=0\n  [FAIL] 2024+>0\nVERDICT: FAIL",
+  "err": ""
+ },
+ {
+  "name": "nnC_005",
+  "md5": "526c56aacd163dc3f299ffdaf36db7d8",
+  "validate": "\"verdict\": \"PASS\"",
+  "screen": "SCREEN nnC_005 (stats_canonical, engine convention)\n  mean_excess -1.87%/mo | t -0.89 | DD -73.1% | worst_abs_month -29.0%\n  halves -51.1/+54.7 | 2024+ mean excess -1.18%/mo\n  [FAIL] mean>0\n  [PASS] worst>=-40\n  [FAIL] halves>=0\n  [FAIL] 2024+>0\nVERDICT: FAIL",
+  "err": ""
+ }
+]
