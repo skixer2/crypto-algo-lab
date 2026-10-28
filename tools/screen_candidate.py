@@ -15,6 +15,32 @@ import pandas as pd
 from tuner.alpha_orchestrator import build_fund_pct
 from tools.stats_canonical import grade, load_bench
 
+
+
+def add_external_columns(c: pd.DataFrame) -> pd.DataFrame:
+    """AMENDMENT v2 declared columns (AGENT_CONTRACT.md): causal joins, native cadence."""
+    import numpy as np
+    m = pd.read_csv('framework/data_cache/binance_um_metrics/ETHUSDT_metrics_5m.csv.gz')
+    m['ts_utc'] = pd.to_datetime(m['ts_utc'], utc=True)
+    m = m.set_index('ts_utc').sort_index().shift(1)  # publication margin: one 5m row
+    for col, name in [('sum_open_interest', 'oi_contracts'), ('sum_open_interest_value', 'oi_value'),
+                      ('sum_toptrader_long_short_ratio', 'ls_top_pos'),
+                      ('count_toptrader_long_short_ratio', 'ls_top_acc'),
+                      ('count_long_short_ratio', 'ls_accounts'),
+                      ('sum_taker_long_short_vol_ratio', 'taker_ls')]:
+        c[name] = col and m[col].reindex(c.index, method='ffill')
+    dd = pd.read_csv('framework/data_cache/deribit_eth_dvol_daily.csv')
+    dcol = dd.columns[0]
+    dd[dcol] = pd.to_datetime(dd[dcol], utc=True)
+    dsi = dd.set_index(dcol).sort_index().shift(1)
+    c['dvol'] = dsi['close'].reindex(c.index, method='ffill')
+    l = pd.read_csv('framework/data_cache/okx_eth_lending_rate_hourly.csv')
+    l['ts_utc'] = pd.to_datetime(l['ts_utc'], utc=True)
+    l = l.set_index('ts_utc').sort_index().shift(1)
+    c['lend_rate'] = l['lendingRate'].reindex(c.index, method='ffill')
+    return c
+
+
 CACHE = 'framework/data_cache/okx_ETH_USDT_15m_20210101_20260928.csv'
 
 
@@ -27,6 +53,7 @@ def main():
     c.columns = [x.lower() for x in c.columns]
     c['timestamp'] = pd.to_datetime(c['timestamp'], utc=True)
     c = c.set_index('timestamp')
+    c = add_external_columns(c)
     c['fund_pct'] = build_fund_pct(
         c.reset_index()[['timestamp', 'open', 'high', 'low', 'close']].set_index('timestamp'),
         'binance', 'ETH/USDT')

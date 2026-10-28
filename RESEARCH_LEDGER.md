@@ -252,3 +252,10 @@ DEPLOYMENT LAYER (distinct): live rails v0 PROVISIONAL field-unverified (de-risk
 - Decision: ONBOARD NOW = (1) Binance UM ETH metrics 5m panel [pulled: 1792/1793 days, 2021-12+; OI usd+contracts, 3x L/S ratios, taker flow]; (2) BTC metrics 2020-09+ (same pipeline); (3) Deribit eth_dvol daily (options-fear dimension, never used before); (4) OKX lending-rate history (attempt; DEAD if not public). FUTURE RESOURCE = FRED macro (DXY/yields/VIX), BTC ETF flows (2y thin), futures basis. DEAD = Binance liquidation snapshots (empty/discontinued).
 - DS subagent (data-onboard) builds panels + QA + draft contract amendment. Columns usable by formulas ONLY after amendment lands (declaration-before-use).
 - Rationale for the order: positioning/flow at native 15m resolution with 4.9y depth = the exact class the NN verdict identified as the only frontier; DVOL adds an orthogonal dimension; the rest overlaps or is thin.
+
+### 2026-10-28 09:0x UTC — AMENDMENT v2 LANDED (declared external columns) + plumbing verified
+- Onboarding verified by flagship hands: ETH panel spot-check byte-exact vs raw zip (288/288), 515,956 rows 0 dups; BTC 2,248/2,248 zips 0 gaps; DVOL 2,045d clean; lending 42,687h live-not-dead (surprise).
+- AGENT_CONTRACT.md Amendment v2: D1 ETH metrics 5m (oi_contracts, oi_value, ls_top_pos, ls_top_acc, ls_accounts, taker_ls), D2 BTC metrics (cache, conditioning), D3 dvol daily, D4 lend_rate hourly — causal joins, native-cadence ffill, publication shifts.
+- Plumbing: screen_candidate add_external_columns — regression anchor ta_bb_native EXACT (-10.23, pre==post); 076a through extended screen +2.61 t1.78 (FAILs 2024+ door — correct: recent-regime-negative class); new cols 0% NaN, sample values sane.
+- Flagship honest note: 3 self-inflicted plumbing bugs fixed live (self-referencing load, pandas-utc kwarg absence, unsorted reindex) — all caught by the regression anchor discipline; no silent pass possible.
+- Loop charter v3 (cron patched in same breath): vocabulary = price + funding + POSITIONING + FLOW + FEAR. Tonight's 19:26 cycle = first generation with new inputs.
