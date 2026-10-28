@@ -239,3 +239,11 @@ DEPLOYMENT LAYER (distinct): live rails v0 PROVISIONAL field-unverified (de-risk
 ### 2026-10-26 21:30 UTC — BTC dust swept to USDT (JP order)
 - Spot-sold 0.000689 BTC @ ~80,055 (+55.19 USDT, fee 0.055). Account now 110.92 USDT + dust-skeleton 1.8e-9 BTC. Attribution clean from here: every equity move = strategy.
 - Market note: BTC 80k (vs 62.7k July) while ETH 2306 — ETH/BTC divergence regime, consistent with runner's flat discipline.
+
+### 2026-10-28 07:0x UTC — NN parallel-path design + Pilot A (DS): measured dead end at this data scale
+- DS designed 3 lawful NN roles, ranked, and RAN the pre-registered top pilot (19 min, within budget, no protected-path commits). Flagship verified artifacts (commit 96749f4).
+- Role 1 GBM rule-extractor: K1 DEAD — H96 median valid AUC 0.525 (<0.53); H672 median 0.577 but train-valid gaps 0.19-0.30 in 3/3 folds (>0.15) + 2025-26 fold ANTI-transfer 0.477 (recent-era disease). Extraction correctly skipped per spec.
+- Control arm (grammar enumeration, 2908 shallow conjunction rules): winner's curse measured live — best-of-2908 in-window +0.96%/mo -> canonical -0.53..-1.87, 0/5 PASS. The month's lesson as a controlled experiment.
+- Rankings: Role 3 vacuous (0 battery-passes to guide on), Role 2 dominated (autoencoder==PCA subset of raw). Conclusion (DS + flagship endorse): shallow-conjunction search EXHAUSTED at this feature/label scale regardless of searcher; only surviving signal ever (BTC-30d gate) came from mechanism reasoning, never rediscovered by search.
+- Real frontier = NEW INPUTS: OI/depth/funding caches (accruing; public OI history shallow 2026-07+; deep OI/liquidation history = CoinGlass paid source — JP decision pending since 10-13, revived in this light) + mechanism stories (loop continues).
+- Maintenance: screen_candidate halves floor hardened to EXCESS basis (was absolute; no historical verdict changed — all prior fails were decisive on mean/2024+). Validator nit logged: validate_formula.py synth frame lacks fund_pct (076a itself fails it) — fix queued.

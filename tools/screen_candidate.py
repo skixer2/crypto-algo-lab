@@ -39,8 +39,13 @@ def main():
     eq_s = pd.Series(eq.values, index=c.index)
     r = grade(eq_s, bench, name=name, trap_asserts=False)
 
-    mid = len(eq_s) // 2
-    halves = (eq_s.iloc[:mid].pct_change().sum() * 100, eq_s.iloc[mid:].pct_change().sum() * 100)
+    # halves on EXCESS basis (strategy - bench), per canonical floors —
+    # absolute halves were a soft spot caught 2026-10-28 (no verdict changed)
+    m_all = eq_s.groupby(eq_s.index.to_period('M')).last() / eq_s.groupby(eq_s.index.to_period('M')).first() - 1
+    b_all = bench.groupby(bench.index.to_period('M')).last() / bench.groupby(bench.index.to_period('M')).first() - 1
+    exc_m = (m_all - b_all).dropna()
+    mid = len(exc_m) // 2
+    halves = (exc_m.iloc[:mid].mean() * 100, exc_m.iloc[mid:].mean() * 100)
 
     recent = c.index >= '2024-01-01'
     er = eq_s[recent]; er = er / er.iloc[0]
